@@ -76,6 +76,15 @@ static struct poptOption main_options[] = {
 	0
     },
     {
+	"rf",
+	'\0',
+	POPT_ARG_NONE,
+	&options::print_rf_dist,
+	0,
+	"Print Robinson-Foulds distance ((false-positives+false-negatives)/2).",
+	0
+    },
+    {
 	"print-sim",
 	'\0',
 	POPT_ARG_NONE,
@@ -188,6 +197,35 @@ print_norm_dist_matrix(size_t label_width,
 	}
     cout << endl;
 }
+
+static void
+print_rf_matrix(size_t label_width,
+		vector< vector<unsigned int> > &split_dist_matrix,
+		const vector<const char*> &tree_files)
+{
+    size_t no_trees = split_dist_matrix.size();
+    cout << "Robinson-Foulds Matrix:\n"
+	 << "-----------------------\n";
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    cout << setw(label_width)
+		 << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			cout << "  -" << ' ';
+		    else
+			// FIXME: width shouldn't be fixed at 3
+			cout << setw(3)
+			     << double(split_dist_matrix[i][j]
+				       + split_dist_matrix[j][i])/2
+			     << ' ';
+		}
+	    cout << endl;
+	}
+    cout << endl;
+}
+
 
 static void
 print_similarity(size_t label_width,
@@ -422,6 +460,11 @@ main(int argc, const char *argv[])
 		  exit(2);
 	      }
 	  Tree *t = parse_file(fp); fclose(fp);
+	  if (!t)
+	      {
+		  cerr << "in file `" << fname << "'\n";
+		  exit(2);
+	      }
 	  trees.push_back(t);
       }
 
@@ -585,6 +628,9 @@ main(int argc, const char *argv[])
 
     if (options::print_norm_dist)
 	print_norm_dist_matrix(label_width,norm_dist_matrix, tree_files);
+
+    if (options::print_rf_dist)
+	print_rf_matrix(label_width,split_dist_matrix, tree_files);
 
     if (options::print_similarity)
 	print_similarity(label_width,sim_matrix, tree_files);

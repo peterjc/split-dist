@@ -13,6 +13,7 @@ int yylex(void);
 void yyerror(char *msg);
 
 int lex_get_line (void);
+void lex_reset_line_number (void); 
 
 #include "tree.hh"
 extern Tree *yy_tree; 		// forward decl.
@@ -44,6 +45,8 @@ top: tree 			{ yy_tree = $1; }
 
 tree:
     '(' edge_list ')' 		{ $$ = new InnerNode($2); delete $2; }
+  | '(' edge_list ')' ':' FLOAT { $$ = new InnerNode($2); delete $2; }
+  | '(' edge_list ')' FLOAT ':' FLOAT { $$ = new InnerNode($2); delete $2; }
   | leaf 			{ $$ = $1; }
   ;
 
@@ -84,6 +87,7 @@ parse_string(const char *str)
 {
     int res;
 
+    lex_reset_line_number();
     YY_BUFFER_STATE buf = yy_scan_string(str);
     res = yyparse();
     yy_delete_buffer(buf);
@@ -99,6 +103,7 @@ parse_file(FILE *fp)
 {
     int res;
 
+    lex_reset_line_number();
     YY_BUFFER_STATE parser_buf = yy_create_buffer(fp, YY_BUF_SIZE);
     yy_switch_to_buffer(parser_buf);
     res = yyparse();

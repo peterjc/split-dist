@@ -12,6 +12,7 @@ namespace options {
     int verbose;
 
     int print_norm_dist;
+    int print_rf_dist;
     int print_similarity;
 
     int print_split_statistics;

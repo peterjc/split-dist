@@ -13,6 +13,7 @@ namespace options {
     extern int verbose;
 
     extern int print_norm_dist;
+    extern int print_rf_dist;
     extern int print_similarity;
 
     extern int print_split_statistics;

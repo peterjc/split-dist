@@ -1,3 +1,8 @@
+2004-06-02  Thomas Mailund  <mailund@birc.dk>
+
+	* parser.yy: changed parser so it accepts a length and bootstrap
+	value for the out-most edge.
+
 2004-05-04  Thomas Mailund  <mailund@birc.dk>
 
 	* sdist.cc: equal label-sets were not checked for, and this caused

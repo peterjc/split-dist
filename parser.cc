@@ -17,12 +17,13 @@ int yylex(void);
 void yyerror(char *msg);
 
 int lex_get_line (void);
+void lex_reset_line_number (void); 
 
 #include "tree.hh"
 extern Tree *yy_tree; 		// forward decl.
  
 
-#line 22 "parser.yy"
+#line 23 "parser.yy"
 #ifndef YYSTYPE
 typedef union {
     Tree              *tree;
@@ -41,7 +42,7 @@ typedef union {
 
 
 
-#define	YYFINAL		18
+#define	YYFINAL		23
 #define	YYFLAG		-32768
 #define	YYNTBASE	8
 
@@ -82,13 +83,15 @@ static const char yytranslate[] =
 #if YYDEBUG
 static const short yyprhs[] =
 {
-       0,     0,     2,     6,     8,    11,    16,    22,    23
+       0,     0,     2,     6,    12,    19,    21,    24,    29,    35,
+      36
 };
 static const short yyrhs[] =
 {
-       9,     0,     5,    10,     6,     0,    11,     0,     9,    10,
-       0,     9,     7,     3,    10,     0,     9,     3,     7,     3,
-      10,     0,     0,     4,     0
+       9,     0,     5,    10,     6,     0,     5,    10,     6,     7,
+       3,     0,     5,    10,     6,     3,     7,     3,     0,    11,
+       0,     9,    10,     0,     9,     7,     3,    10,     0,     9,
+       3,     7,     3,    10,     0,     0,     4,     0
 };
 
 #endif
@@ -97,7 +100,8 @@ static const short yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined. */
 static const short yyrline[] =
 {
-       0,    42,    45,    47,    50,    52,    53,    54,    57
+       0,    43,    46,    48,    49,    50,    53,    55,    56,    57,
+      60
 };
 #endif
 
@@ -115,13 +119,15 @@ static const char *const yytname[] =
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives. */
 static const short yyr1[] =
 {
-       0,     8,     9,     9,    10,    10,    10,    10,    11
+       0,     8,     9,     9,     9,     9,    10,    10,    10,    10,
+      11
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN. */
 static const short yyr2[] =
 {
-       0,     1,     3,     1,     2,     4,     5,     0,     1
+       0,     1,     3,     5,     6,     1,     2,     4,     5,     0,
+       1
 };
 
 /* YYDEFACT[S] -- default rule to reduce with in state S when YYTABLE
@@ -129,40 +135,44 @@ static const short yyr2[] =
    error. */
 static const short yydefact[] =
 {
-       0,     8,     7,     1,     3,     7,     0,     0,     0,     4,
-       2,     0,     7,     7,     5,     6,     0,     0,     0
+       0,    10,     9,     1,     5,     9,     0,     0,     0,     6,
+       2,     0,     9,     0,     0,     9,     7,     0,     3,     8,
+       4,     0,     0,     0
 };
 
 static const short yydefgoto[] =
 {
-      16,     5,     6,     4
+      21,     5,     6,     4
 };
 
 static const short yypact[] =
 {
-       5,-32768,     5,-32768,-32768,    -2,     0,    -3,     8,-32768,
-  -32768,     9,     5,     5,-32768,-32768,    13,    14,-32768
+       7,-32768,     7,-32768,-32768,    -2,     0,     2,    10,-32768,
+       1,    11,     7,     8,    13,     7,-32768,    14,-32768,-32768,
+  -32768,    18,    19,-32768
 };
 
 static const short yypgoto[] =
 {
-  -32768,    15,    -5,-32768
+  -32768,    20,    -5,-32768
 };
 
 
-#define	YYLAST		15
+#define	YYLAST		20
 
 
 static const short yytable[] =
 {
-       9,     7,     1,     2,    11,     8,    10,    14,    15,     1,
-       2,    12,    13,    17,    18,     3
+       9,     7,     1,     2,    13,     8,    10,    16,    14,    11,
+      19,     1,     2,    12,    15,    17,    18,    20,    22,    23,
+       3
 };
 
 static const short yycheck[] =
 {
-       5,     3,     4,     5,     7,     7,     6,    12,    13,     4,
-       5,     3,     3,     0,     0,     0
+       5,     3,     4,     5,     3,     7,     6,    12,     7,     7,
+      15,     4,     5,     3,     3,     7,     3,     3,     0,     0,
+       0
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
 #line 3 "/usr/share/bison/bison.simple"
@@ -872,35 +882,43 @@ yyreduce:
   switch (yyn) {
 
 case 1:
-#line 42 "parser.yy"
+#line 43 "parser.yy"
 { yy_tree = yyvsp[0].tree; }
     break;
 case 2:
-#line 46 "parser.yy"
+#line 47 "parser.yy"
 { yyval.tree = new InnerNode(yyvsp[-1].edge_list); delete yyvsp[-1].edge_list; }
     break;
 case 3:
-#line 47 "parser.yy"
-{ yyval.tree = yyvsp[0].leaf; }
+#line 48 "parser.yy"
+{ yyval.tree = new InnerNode(yyvsp[-3].edge_list); delete yyvsp[-3].edge_list; }
     break;
 case 4:
-#line 51 "parser.yy"
-{ yyval.edge_list = yyvsp[0].edge_list; yyval.edge_list->push_back(new Edge(yyvsp[-1].tree,0.0)); }
+#line 49 "parser.yy"
+{ yyval.tree = new InnerNode(yyvsp[-4].edge_list); delete yyvsp[-4].edge_list; }
     break;
 case 5:
-#line 52 "parser.yy"
-{ yyval.edge_list = yyvsp[0].edge_list; yyval.edge_list->push_back(new Edge(yyvsp[-3].tree,yyvsp[-1].f)); }
+#line 50 "parser.yy"
+{ yyval.tree = yyvsp[0].leaf; }
     break;
 case 6:
-#line 53 "parser.yy"
-{ yyval.edge_list = yyvsp[0].edge_list; yyval.edge_list->push_back(new Edge(yyvsp[-4].tree,yyvsp[-1].f)); }
+#line 54 "parser.yy"
+{ yyval.edge_list = yyvsp[0].edge_list; yyval.edge_list->push_back(new Edge(yyvsp[-1].tree,0.0)); }
     break;
 case 7:
-#line 54 "parser.yy"
-{ yyval.edge_list = new list<Edge*>(); }
+#line 55 "parser.yy"
+{ yyval.edge_list = yyvsp[0].edge_list; yyval.edge_list->push_back(new Edge(yyvsp[-3].tree,yyvsp[-1].f)); }
     break;
 case 8:
-#line 58 "parser.yy"
+#line 56 "parser.yy"
+{ yyval.edge_list = yyvsp[0].edge_list; yyval.edge_list->push_back(new Edge(yyvsp[-4].tree,yyvsp[-1].f)); }
+    break;
+case 9:
+#line 57 "parser.yy"
+{ yyval.edge_list = new list<Edge*>(); }
+    break;
+case 10:
+#line 61 "parser.yy"
 { yyval.leaf = new Leaf(yyvsp[0].str); }
     break;
 }
@@ -1136,7 +1154,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 61 "parser.yy"
+#line 64 "parser.yy"
 
 
 void
@@ -1163,6 +1181,7 @@ parse_string(const char *str)
 {
     int res;
 
+    lex_reset_line_number();
     YY_BUFFER_STATE buf = yy_scan_string(str);
     res = yyparse();
     yy_delete_buffer(buf);
@@ -1178,6 +1197,7 @@ parse_file(FILE *fp)
 {
     int res;
 
+    lex_reset_line_number();
     YY_BUFFER_STATE parser_buf = yy_create_buffer(fp, YY_BUF_SIZE);
     yy_switch_to_buffer(parser_buf);
     res = yyparse();

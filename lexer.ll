@@ -63,3 +63,9 @@ lex_get_line (void)
 {
     return current_line;
 }
+
+void
+lex_reset_line_number (void)
+{
+    current_line = 1;
+}
