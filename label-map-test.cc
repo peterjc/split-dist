@@ -2,8 +2,9 @@
 //                             University of Aarhus, Denmark
 //                             Contact: Thomas Mailund <mailund@birc.dk>
 
-#include "label-map.hh"
 
+#include "label-map.hh"
+#include <cassert>
 
 int
 main(int argc, const char *argv[])

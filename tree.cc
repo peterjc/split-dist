@@ -5,6 +5,7 @@
 #include "tree.hh"
 #include "visitor.hh"
 #include <functional>
+#include <cassert>
 using namespace std;
 
 int Tree::no_trees;

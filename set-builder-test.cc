@@ -8,6 +8,7 @@
 #include "split-set-count.hh"
 
 #include <map>
+#include <cassert>
 using namespace std;
 
 int

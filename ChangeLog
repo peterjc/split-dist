@@ -1,3 +1,7 @@
+2004-04-16  Thomas Mailund  <mailund@birc.dk>
+
+	* : added #include <cassert> a number of places to avoid compile errors
+
 2004-04-07  Thomas Mailund  <mailund@birc.dk>
 
 	* sdist.cc: added printing of normalized distance and similarity.

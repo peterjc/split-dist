@@ -8,6 +8,7 @@
 #include <set>
 #include <map>
 #include <string>
+#include <cassert>
 using namespace std;
 
 class LabelTester : public LeafVisitor {

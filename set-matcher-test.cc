@@ -8,6 +8,7 @@
 #include "set-matcher.hh"
 
 #include <sstream>
+#include <cassert>
 using namespace std;
 
 int
