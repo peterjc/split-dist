@@ -1,0 +1,38 @@
+
+AC_INIT(sdist, 0.1.0, mailund@birc.dk)
+AM_INIT_AUTOMAKE(sdist, 0.1.0)
+AM_CONFIG_HEADER(config.hh)
+
+AC_PROG_CXX
+AM_PROG_LEX
+AC_PROG_YACC
+AC_PROG_INSTALL
+
+AC_CHECK_LIB(popt, poptGetContext,
+  dnl FOUND, DO NOTHING
+,
+  dnl NOT FOUND
+AC_WARN([[
+
+************************************************************************
+************************************************************************
+
+The popt option parsing library was not found.  This is currently the
+only supported form of option parsing, so without it you will not have
+access to a number of command line options.
+
+If you need command line options, and for some reason are not able to
+install the popt library, please contact me.  If I get enough
+requests, I am happy to implement my own option parsing, so far I just
+haven't bothered.
+
+************************************************************************
+************************************************************************
+
+]])
+)
+
+AC_OUTPUT([
+	Makefile
+])
+
