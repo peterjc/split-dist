@@ -119,6 +119,8 @@ main(int argc, const char *argv[])
     assert(sb.lookup(&bs) == 0);
 
 
+    return 0;
+
     split_set_count::ss_count_iterator_t i;
     for (i = split_set_count::begin(); i != split_set_count::end(); ++i)
 	if (!i->first.is_trivial())

@@ -1,0 +1,97 @@
+
+Split-Dist is a tool for calculating the split-distance between binary
+trees (i.e. the number of splits present in the one tree but not the
+other).
+
+The split-dist program reads in a set of trees in Newick format and
+calculates which of the edges/splits are shared between them.  The
+result is given in the form of a matrix, where entry i,j gives the
+number of edges in tree i that are also found in tree j.
+
+ Statistics about the splits _not_ shared between two trees can also
+ be calculate.  This is done by considering, for each non-trivial
+ split---splits with more than a leaf element on both sides of the
+ edge---the size of the smallest of the two sets in the split A|B.
+ The maximal, minimal and averge size of the smallest set in the
+ splits not shared are calculated and reported.  This statistics gives
+ an indication of how "local" the differences are between the two
+ trees&mdash;if the smallest set is small, the edge that differs gives
+ a difference in a small sub-tree, if the set is larger, the
+ difference is more global.  To get the split-statistics use option
+ --print-split-statistics.
+
+
+The tool can also calculate the set of splits found in any tree (with
+a cound of how often the split is found) and the set of splits shared
+by all trees in the set.  This information is printed if the program
+is called with the options --print-all-splits or --print-shared-splits
+
+Information about which splits in one tree are also found in the other
+trees can be reported in an annotated tree.  This tree, output in
+Newick format, has the same topology as the first tree, but the edges
+are written as 
+
+  sub-tree f : branch-length,
+
+where f is the fraction of the trees that contains the edge, i.e., 1
+if the edge is supported by all trees or 0.5 if only half the trees
+contains the edge.
+
+If, for example, we run <tt>sdist tree1.tre tree2.tre, where
+tree1.tre is:
+
+(
+  ('Chimp':0.052625,
+   'Human':0.042375):0.007875,
+  'Gorilla':0.060125,
+  ('Gibbon':0.124833,
+   'Orangutan':0.0971667):0.038875
+);
+
+
+and tree2.tre is:
+
+(
+  'Chimp':0.052625,
+  ('Human':0.042375,
+   'Gorilla':0.060125):0.007875,
+  ('Gibbon':0.124833,
+   'Orangutan':0.0971667):0.038875
+);
+
+sdist, with options --verbose --print-all-splits --print-trees will report
+
+Distance matrix:
+tree1.tre :   -   1
+tree2.tre :   1   -
+ 
+1 out of 3 non-trivial splits shared by all trees.
+ 
+All splits:
+Human Chimp | Orangutan Gibbon Gorilla  : 1
+Gorilla Human | Orangutan Gibbon Chimp  : 1
+Gorilla Human Chimp | Orangutan Gibbon  : 2
+ 
+tree1.tre : 
+  (
+   ('Orangutan' 1 : 0.0971667, 
+    'Gibbon' 1 : 0.124833) 1 : 0.038875,
+   'Gorilla' 1 : 0.060125, 
+   ('Human' 1 : 0.042375, 
+    'Chimp' 1 : 0.052625) 0.5 : 0.007875
+  )
+tree2.tre : 
+  (
+   ('Orangutan' 1 : 0.0971667,
+    'Gibbon' 1 : 0.124833) 1 : 0.038875,
+   ('Gorilla' 1 : 0.060125, 
+    'Human' 1 : 0.042375) 0.5 : 0.007875,
+   'Chimp' 1 : 0.052625
+  )
+
+Only non-trivial splits are reported as the the trivial splits are
+shared by all trees.
+
+Run sdist --help for more info.
+
+

@@ -1,3 +1,14 @@
+2004-03-21  Thomas Mailund  <mailund@birc.dk>
+
+	* set-matcher.hh: removed division-by-zero error when no splits
+	differs between two trees
+
+2004-03-21  Thomas Mailund  <mailund@birc.dk>
+
+	* set-matcher.hh: moved counting to set-matcher and removed
+	result-counter -- we can make some more detailed counting and
+	stuff this way.
+
 2003-10-07  Thomas Mailund  <mailund@birc.dk>
 
 	* configure.in: bumped to 0.1.2

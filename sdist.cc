@@ -19,7 +19,6 @@ using namespace std;
 #include "label-map-visitor.hh"
 #include "set-builder.hh"
 #include "set-matcher.hh"
-#include "result-counter.hh"
 #include "split-set-count.hh"
 
 
@@ -58,6 +57,25 @@ static struct poptOption main_options[] = {
 	0
     },
     {
+	"silent",
+	's',
+	POPT_ARG_NONE,
+	&options::silent,
+	0,
+	"Produce minimal output.",
+	0
+    },
+    {
+	"print-split-statistics",
+	'\0',
+	POPT_ARG_NONE,
+	&options::print_split_statistics,
+	0,
+	"Print information about the size of the non-matching splits (the size"
+	" of the smallest set in the split).",
+	0
+    },
+    {
 	"print-trees",
 	'p',
 	POPT_ARG_NONE,
@@ -77,7 +95,7 @@ static struct poptOption main_options[] = {
     },
     {
 	"print-shared-splits",
-	'p',
+	'\0',
 	POPT_ARG_NONE,
 	&options::print_shared_splits,
 	0,
@@ -101,6 +119,183 @@ static struct poptOption main_options[] = {
 
 
 
+static void
+print_dist_matrix(size_t label_width,
+		  vector< vector<unsigned int> > &split_dist_matrix,
+		  const vector<const char*> &tree_files)
+{
+    size_t no_trees = split_dist_matrix.size();
+    cout << "Distance Matrix:\n"
+	 << "----------------\n";
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    cout << setw(label_width)
+		 << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			cout << "  -" << ' ';
+		    else
+			// FIXME: width shouldn't be fixed at 3
+			cout << setw(3) << split_dist_matrix[i][j] << ' ';
+		}
+	    cout << endl;
+	}
+    cout << endl;
+}
+
+static void
+print_split_statistics(size_t label_width,
+		       vector< vector<unsigned int> > &max_small_set,
+		       vector< vector<unsigned int> > &min_small_set,
+		       vector< vector<double> > &avg_small_set,
+		       const vector<const char*> &tree_files)
+{
+    size_t no_trees = max_small_set.size();
+
+    unsigned int min_val, max_val, sum;
+
+    cout << "Split statistics:\n"
+	 << "-----------------\n";
+    if (!options::silent) cout << endl;
+
+    cout << "Max size of smallest set:\n";
+    min_val = numeric_limits<unsigned int>::max();
+    max_val = 0;
+    sum = 0;
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    if (!options::silent)
+		cout << setw(label_width)
+		     << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			{
+			    if (!options::silent) cout << "  -" << ' ';
+			}
+		    else
+			{
+			    min_val = std::min(min_val,max_small_set[i][j]);
+			    max_val = std::max(max_val,max_small_set[i][j]);
+			    sum += max_small_set[i][j];
+
+			    // FIXME: width shouldn't be fixed at 3
+			    if (!options::silent)
+				cout << setw(3) << max_small_set[i][j] << ' ';
+			}
+		}
+	    if (!options::silent) cout << endl;
+	}
+    if (!options::silent) cout << endl;
+    cout << "max in matrix: " << max_val << '\n'
+	 << "min in matrix: " << min_val << '\n'
+	 << "avg of matrix: "
+	 << static_cast<double>(sum)/(no_trees*(no_trees-1))
+	 << endl << endl;
+
+    cout << "Min size of smallest set:\n";
+    min_val = numeric_limits<unsigned int>::max();
+    max_val = 0;
+    sum = 0;
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    if (!options::silent)
+		cout << setw(label_width)
+		     << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			{
+			    if (!options::silent) cout << "  -" << ' ';
+			}
+		    else
+			{
+			    min_val = std::min(min_val,min_small_set[i][j]);
+			    max_val = std::max(max_val,min_small_set[i][j]);
+			    sum += min_small_set[i][j];
+
+			    // FIXME: width shouldn't be fixed at 3
+			    if (!options::silent)
+				cout << setw(3) << min_small_set[i][j] << ' ';
+			}
+		}
+	    if (!options::silent) cout << endl;
+	}
+    if (!options::silent) cout << endl;
+    cout << "max in matrix: " << max_val << '\n'
+	 << "min in matrix: " << min_val << '\n'
+	 << "avg of matrix: "
+	 << static_cast<double>(sum)/(no_trees*(no_trees-1))
+	 << endl << endl;
+
+    double min_val_d, max_val_d, sum_d;
+    cout << "Average size of smallest set:\n";
+    min_val_d = numeric_limits<double>::max();
+    max_val_d = 0.0;
+    sum_d = 0.0;
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    if (!options::silent)
+		cout << setw(label_width)
+		     << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			{
+			    if (!options::silent) cout << "     -" << ' ';
+			}
+		    else
+			{
+			    min_val_d = std::min(min_val_d,
+						 avg_small_set[i][j]);
+			    max_val_d = std::max(max_val_d,
+						 avg_small_set[i][j]);
+			    sum_d += avg_small_set[i][j];
+
+			    // FIXME: format shouldn't be fixed
+			    if (!options::silent)
+				cout << setprecision(2) << fixed
+				     << setw(6)
+				     << avg_small_set[i][j] << ' ';
+			}
+		}
+	    if (!options::silent) cout << endl;
+	}
+    if (!options::silent) cout << endl;
+    cout << "max in matrix: " << max_val_d << '\n'
+	 << "min in matrix: " << min_val_d << '\n'
+	 << "avg of matrix: "
+	 << sum_d/(no_trees*(no_trees-1))
+	 << endl << endl;
+}
+
+static void
+print_shared_splits()
+{
+    cout << "Shared Splits:\n"
+	 << "--------------\n";
+    split_set_count::ss_count_iterator_t i;
+    for (i = split_set_count::begin();
+	 i != split_set_count::end(); ++i)
+	if (!i->first.is_trivial()
+	    and i->second == Tree::number_of_trees())
+	    cout << i->first << endl;
+    cout << endl;
+}
+
+static void
+print_all_splits()
+{
+    cout << "All Splits:\n"
+	 << "-----------\n";
+    split_set_count::ss_count_iterator_t i;
+    for (i = split_set_count::begin();
+	 i != split_set_count::end(); ++i)
+	if (!i->first.is_trivial())
+	    cout << i->first << " : " << i->second << endl;
+    cout << endl;
+}
 
 int
 main(int argc, const char *argv[])
@@ -132,7 +327,7 @@ main(int argc, const char *argv[])
       {
 	  cout << PACKAGE_STRING << "\n\n";
 	  cout << "For questions or comments on sdist, contact:\n"
-	       << "\tThomas Mailund <thomas@mailund.dk>, <mailund@birc.dk>\n"
+	       << "\tThomas Mailund <mailund@birc.dk>\n"
 	       << "\n";
 	  return 0;
       }
@@ -179,14 +374,21 @@ main(int argc, const char *argv[])
 	}
     
 
-    cout << "Distance matrix:\n";
+    vector< vector<unsigned int> >
+	split_dist_matrix(trees.size(), vector<unsigned int>(trees.size()));
+
+    vector< vector<unsigned int> >
+	max_small_set(trees.size(), vector<unsigned int>(trees.size()));
+    vector< vector<unsigned int> >
+	min_small_set(trees.size(), vector<unsigned int>(trees.size()));
+    vector< vector<double> >
+	avg_small_set(trees.size(), vector<double>(trees.size()));
+
     for (unsigned int i = 0; i < trees.size(); ++i)
 	{
 	    Tree *main_tree = trees[i];
 	    SetBuilder sb(lm);
 	    Leaf *r1 = main_tree->find_leaf(lm.root_label());
-
-	    cout << setw(10) << string(tree_files[i]).substr(0,10) << " : ";
 
 	    try
 		{
@@ -201,20 +403,19 @@ main(int argc, const char *argv[])
 
 	    for (unsigned int j = 0; j < trees.size(); ++j)
 		{
-		    if (i == j) { cout << " - " << ' '; continue; }
+		    if (i == j)
+			{
+			    split_dist_matrix[i][j] = 0;
+			    continue;
+			}
 
 		    Tree *t = trees[j];
 		    SetMatcher sm(lm,sb);
-		    ResultCounter rs;
-		    ClearSupported cs;
 
 		    try
 			{
 			    Leaf *r2 = t->find_leaf(lm.root_label());
-
 			    r2->dfs_traverse(sm);
-			    r1->dfs_traverse(rs);
-			    r1->dfs_traverse(cs);
 			}
 		    catch (LabelMap::UnkownLabelEx ex)
 			{
@@ -224,15 +425,17 @@ main(int argc, const char *argv[])
 			    return 2;
 			}
 
-		    cout << setw(3) << rs.edge_count - rs.sup_count << ' ';
+		    split_dist_matrix[i][j] = sm.edge_count() - sm.sup_count();
+		    if (options::print_split_statistics)
+			{
+			    max_small_set[i][j] = sm.max_small_set();
+			    min_small_set[i][j] = sm.min_small_set();
+			    avg_small_set[i][j] = sm.avg_small_set();
+			}
 		}
-
-	    cout << endl;
-
 	}
-    cout << endl;
 
-    if (options::verbose)
+    if (options::verbose || options::silent)
 	{
 	    int no_splits = 0, no_splits_shared = 0;
 	    split_set_count::ss_count_iterator_t i;
@@ -249,37 +452,27 @@ main(int argc, const char *argv[])
 		 << no_splits
 		 << " non-trivial splits shared by all trees.\n\n";
 	}
-    
 
-    if (options::print_shared_splits)
-	{
-	    cout << "Shared splits:\n";
+    size_t label_width = 0;
+    vector<const char*>::const_iterator itr;
+    for (itr = tree_files.begin(); itr != tree_files.end(); ++itr)
+	label_width = max(label_width,strlen(*itr));
 
-	    split_set_count::ss_count_iterator_t i;
-	    for (i = split_set_count::begin();
-		 i != split_set_count::end(); ++i)
-		if (!i->first.is_trivial()
-		    and i->second == Tree::number_of_trees())
-		    cout << i->first << endl;
+    if (!options::silent)
+	print_dist_matrix(label_width,split_dist_matrix, tree_files);
 
-	    cout << endl;
-	}
+    if (options::print_split_statistics)
+	print_split_statistics(label_width,
+			       max_small_set,min_small_set,avg_small_set,
+			       tree_files);
 
-    if (options::print_all_splits)
-	{
-	    cout << "All splits:\n";
-
-	    split_set_count::ss_count_iterator_t i;
-	    for (i = split_set_count::begin();
-		 i != split_set_count::end(); ++i)
-		if (!i->first.is_trivial())
-		    cout << i->first << " : " << i->second << endl;
-
-	    cout << endl;
-	}
+    if (options::print_shared_splits) print_shared_splits();
+    if (options::print_all_splits)    print_all_splits();
 
     if (options::print_trees)
 	{
+	    cout << "Annotated Trees:\n"
+		 << "----------------\n";
 	    for (unsigned int i = 0; i < trees.size(); ++i)
 		cout << tree_files[i] << " : " << *trees[i] << endl;
 	}

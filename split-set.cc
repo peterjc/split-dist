@@ -5,14 +5,11 @@
 #include "split-set.hh"
 
 SplitSet::SplitSet(const LabelMap &lm, const BitSet &bs)
-    : BitSet(bs), _lm(lm), _trivial(false)
+    : BitSet(bs), _lm(lm), _ones(0), _zeros(0)
 {
-    int ones, zeros;
-    ones = zeros = 0;
     for (unsigned int i = 0; i < size(); ++i)
-	if (at(i)) ++ones;
-	else       ++zeros;
-    if (ones == 1 or zeros == 1) _trivial = true;
+	if (at(i)) ++_ones;
+	else       ++_zeros;
 }
 
 void

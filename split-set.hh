@@ -10,16 +10,19 @@
 
 class SplitSet : public BitSet {
     const LabelMap &_lm;
-    bool _trivial;
+    unsigned int _ones, _zeros;
 
 public:
     SplitSet(const LabelMap &lm, const BitSet &bs);
 
-    bool is_trivial() const { return _trivial; } // is it a trivial
-						 // split, i.e., does
-						 // it split in a
-						 // singleton and the
-						 // rest?
+    unsigned int ones()  const { return _ones; }
+    unsigned int zeros() const { return _zeros; }
+
+    unsigned int smallest_set() const { return std::min(_ones,_zeros); }
+
+    // is it a trivial split, i.e., does it split in a singleton and
+    // the rest?
+    bool is_trivial() const { return _ones == 1 or _zeros == 1; }
 
     void print(std::ostream &) const;
 };

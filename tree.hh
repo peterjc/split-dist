@@ -35,7 +35,6 @@ class Edge {
     Tree *_t2;
     float _length;
 
-    bool  _supported;
     int   _supported_count;
 
 public:
@@ -45,11 +44,8 @@ public:
     Tree *t1() const { return _t1; }
     Tree *t2() const { return _t2; }
 
-    void tag_supported() { _supported = true; ++_supported_count; }
-    bool supported()       const { return _supported; }
+    void tag_supported()         { ++_supported_count; }
     int  supported_count() const { return _supported_count; }
-
-    void reset_supported() { _supported = false; }
 
     void dfs(class Visitor &, const Tree *from);
     void print(std::ostream &os, const class Tree *from = 0) const;

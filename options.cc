@@ -8,7 +8,10 @@ namespace options {
     int version;
     int contact;
 
+    int silent;
     int verbose;
+
+    int print_split_statistics;
 
     int print_all_splits;
     int print_shared_splits;

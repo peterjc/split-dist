@@ -15,7 +15,7 @@ Tree::~Tree() {}
 
 Edge::Edge(Tree *t2, float length)
     : _t1(0), _t2(t2), _length(length),
-      _supported(false), _supported_count(1) // the edge itself always support
+      _supported_count(1) // the edge itself always support
 {
     assert(t2 != 0);
     _t2->connect(this);
