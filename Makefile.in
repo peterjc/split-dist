@@ -79,7 +79,7 @@ am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
 
-CXXFLAGS = -Wall -g
+CXXFLAGS = -Wall -g -O2
 #CXXFLAGS += -O3 -pg
 #CXXFLAGS += -O3 -fexpensive-optimizations
 # -DNDEBUG

@@ -46,7 +46,7 @@ Edge::print(ostream &os, const class Tree *from) const
 {
     Tree *sub_tree = (from == _t1) ? _t2 : _t1;
     sub_tree->print(os,this);
-    os << (_supported ? 1 : 0) << ':' << _length;
+    os << ' ' << (_supported ? 1 : 0.5) << ':' << _length;
 }
 
 void

@@ -1,0 +1,14 @@
+2003-10-06  Thomas Mailund  <mailund@birc.dk>
+
+	* configure.in: bumped to 0.1.1
+
+	* lexer.ll: changed lexer to accept more forms of leaf-labels.
+
+	* set-matcher-test.cc: updated tests...I forgot to do this when I
+	changed the output of un-supported branches.
+
+2003-10-03  Thomas Mailund  <mailund@birc.dk>
+
+	* sdist.cc (main): catches label-mismatch exceptions so we report
+	it as faulty output rather than just crash.
+

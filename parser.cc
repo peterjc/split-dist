@@ -41,7 +41,7 @@ typedef union {
 
 
 
-#define	YYFINAL		14
+#define	YYFINAL		18
 #define	YYFLAG		-32768
 #define	YYNTBASE	8
 
@@ -82,12 +82,13 @@ static const char yytranslate[] =
 #if YYDEBUG
 static const short yyprhs[] =
 {
-       0,     0,     2,     6,     8,    11,    16,    17
+       0,     0,     2,     6,     8,    11,    16,    22,    23
 };
 static const short yyrhs[] =
 {
        9,     0,     5,    10,     6,     0,    11,     0,     9,    10,
-       0,     9,     7,     3,    10,     0,     0,     4,     0
+       0,     9,     7,     3,    10,     0,     9,     3,     7,     3,
+      10,     0,     0,     4,     0
 };
 
 #endif
@@ -96,7 +97,7 @@ static const short yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined. */
 static const short yyrline[] =
 {
-       0,    42,    45,    47,    50,    52,    53,    56
+       0,    42,    45,    47,    50,    52,    53,    54,    57
 };
 #endif
 
@@ -114,13 +115,13 @@ static const char *const yytname[] =
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives. */
 static const short yyr1[] =
 {
-       0,     8,     9,     9,    10,    10,    10,    11
+       0,     8,     9,     9,    10,    10,    10,    10,    11
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN. */
 static const short yyr2[] =
 {
-       0,     1,     3,     1,     2,     4,     0,     1
+       0,     1,     3,     1,     2,     4,     5,     0,     1
 };
 
 /* YYDEFACT[S] -- default rule to reduce with in state S when YYTABLE
@@ -128,40 +129,40 @@ static const short yyr2[] =
    error. */
 static const short yydefact[] =
 {
-       0,     7,     6,     1,     3,     6,     0,     0,     4,     2,
-       6,     5,     0,     0,     0
+       0,     8,     7,     1,     3,     7,     0,     0,     0,     4,
+       2,     0,     7,     7,     5,     6,     0,     0,     0
 };
 
 static const short yydefgoto[] =
 {
-      12,     5,     6,     4
+      16,     5,     6,     4
 };
 
 static const short yypact[] =
 {
-       2,-32768,     2,-32768,-32768,    -3,     3,     0,-32768,-32768,
-       2,-32768,     8,    10,-32768
+       5,-32768,     5,-32768,-32768,    -2,     0,    -3,     8,-32768,
+  -32768,     9,     5,     5,-32768,-32768,    13,    14,-32768
 };
 
 static const short yypgoto[] =
 {
-  -32768,    11,    -5,-32768
+  -32768,    15,    -5,-32768
 };
 
 
-#define	YYLAST		11
+#define	YYLAST		15
 
 
 static const short yytable[] =
 {
-       8,     1,     2,    10,     7,    11,     1,     2,    13,     9,
-      14,     3
+       9,     7,     1,     2,    11,     8,    10,    14,    15,     1,
+       2,    12,    13,    17,    18,     3
 };
 
 static const short yycheck[] =
 {
-       5,     4,     5,     3,     7,    10,     4,     5,     0,     6,
-       0,     0
+       5,     3,     4,     5,     7,     7,     6,    12,    13,     4,
+       5,     3,     3,     0,     0,     0
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
 #line 3 "/usr/share/bison/bison.simple"
@@ -892,10 +893,14 @@ case 5:
     break;
 case 6:
 #line 53 "parser.yy"
-{ yyval.edge_list = new list<Edge*>(); }
+{ yyval.edge_list = yyvsp[0].edge_list; yyval.edge_list->push_back(new Edge(yyvsp[-4].tree,yyvsp[-1].f)); }
     break;
 case 7:
-#line 57 "parser.yy"
+#line 54 "parser.yy"
+{ yyval.edge_list = new list<Edge*>(); }
+    break;
+case 8:
+#line 58 "parser.yy"
 { yyval.leaf = new Leaf(yyvsp[0].str); }
     break;
 }
@@ -1131,7 +1136,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 60 "parser.yy"
+#line 61 "parser.yy"
 
 
 void

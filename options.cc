@@ -9,6 +9,7 @@ namespace options {
     int contact;
 
     int verbose;
+    int silent;
 
     int print_tree;
     const char *output_fname = 0;

@@ -22,8 +22,7 @@ static int current_line = 1;
 
 D                               [0-9]
 L                               [a-zA-Z_/-]
-ID                              ({D}|{L})+|'[^']*'
-FLOAT                           {D}+|-?[0-9]*\.[0-9]+([eE]-?{D}+)?
+FLOAT                           -?{D}+|-?[0-9]*\.[0-9]+|-?[0-9]*\.[0-9]+[eE][+-]?{D}+
 
 %%
 
@@ -35,7 +34,8 @@ FLOAT                           {D}+|-?[0-9]*\.[0-9]+([eE]-?{D}+)?
 ":"				return ':';
 {FLOAT}				yylval.f = atof(yytext); return FLOAT;
 
-{ID}				yytext[strlen(yytext)-1] = '\0'; yylval.str = yytext+1; return NAME;
+[a-zA-Z][^:() \t\n]*		yylval.str = yytext; return NAME;
+'[^']*'				yytext[strlen(yytext)-1] = '\0'; yylval.str = yytext+1; return NAME;
 
 
 \n				current_line++;

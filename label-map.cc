@@ -9,7 +9,7 @@ using namespace std;
 size_t
 LabelMap::push(string label) throw(AlreadyPushedEx)
 {
-    if (_map.find(label) != _map.end()) throw AlreadyPushedEx();
+    if (_map.find(label) != _map.end()) throw AlreadyPushedEx(label);
     return _map[label] = _count++;
 }
 
@@ -17,6 +17,6 @@ size_t
 LabelMap::operator[](string label) const throw(UnkownLabelEx)
 {
     map<string,size_t>::const_iterator i = _map.find(label);
-    if (i == _map.end()) throw UnkownLabelEx();
+    if (i == _map.end()) throw UnkownLabelEx(label);
     return i->second;
 }

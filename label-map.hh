@@ -17,8 +17,14 @@ class LabelMap {
 public:
     LabelMap() : _count(0) {};
 
-    class AlreadyPushedEx {};
-    class UnkownLabelEx {};
+    struct AlreadyPushedEx {
+	std::string label;
+	AlreadyPushedEx(std::string l) : label(l) {}
+    };
+    struct UnkownLabelEx {
+	std::string label;
+	UnkownLabelEx(std::string l) : label(l) {}
+    };
 
     size_t push(std::string label) throw(AlreadyPushedEx);
     size_t operator[](std::string label) const throw(UnkownLabelEx);

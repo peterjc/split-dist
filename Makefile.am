@@ -1,7 +1,7 @@
 
 CXXFLAGS =
 CXXFLAGS += -Wall
-CXXFLAGS += -g
+CXXFLAGS += -g -O2
 #CXXFLAGS += -O3 -pg
 #CXXFLAGS += -O3 -fexpensive-optimizations
 # -DNDEBUG

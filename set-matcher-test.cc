@@ -17,7 +17,7 @@ main()
 
     ostringstream os1;
     os1 << *t << endl;
-    assert(os1.str() == string("('D'0:0, ('C'0:0.1, 'B'0:10.1)0:0, 'A'0:0)\n"));
+    assert(os1.str() == string("('D' 0.5:0, ('C' 0.5:0.1, 'B' 0.5:10.1) 0.5:0, 'A' 0.5:0)\n"));
 
     LabelMapVisitor lm;
     t->dfs_traverse(lm);
@@ -31,7 +31,7 @@ main()
 
     ostringstream os2;
     os2 << *t << endl;
-    assert(os2.str() == string("('D'1:0, ('C'1:0.1, 'B'1:10.1)1:0, 'A'1:0)\n"));
+    assert(os2.str() == string("('D' 1:0, ('C' 1:0.1, 'B' 1:10.1) 1:0, 'A' 1:0)\n"));
 
     Tree *t1 = parse_string("('A':0.0, ('B':10.1, 'C':0.1), 'D')");
     Tree *t2 = parse_string("(('A':0.0, 'B':10.1):1, 'C':0.1, 'D')");
@@ -52,6 +52,5 @@ main()
 
     ostringstream os3;
     os3 << *t1 << endl;
-    assert(os3.str() == string("('D'1:0, ('C'1:0.1, 'B'1:10.1)0:0, 'A'1:0)\n"));
-    
+    assert(os3.str() == string("('D' 1:0, ('C' 1:0.1, 'B' 1:10.1) 0.5:0, 'A' 1:0)\n"));
 }

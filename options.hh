@@ -10,6 +10,7 @@ namespace options {
     extern int contact;
 
     extern int verbose;
+    extern int silent;
 
     extern int print_tree;
     extern const char *output_fname;

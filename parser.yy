@@ -50,6 +50,7 @@ tree:
 edge_list:
     tree edge_list 		{ $$ = $2; $$->push_back(new Edge($1,0.0)); }
   | tree ':' FLOAT edge_list 	{ $$ = $4; $$->push_back(new Edge($1,$3)); }
+  | tree FLOAT ':' FLOAT edge_list { $$ = $5; $$->push_back(new Edge($1,$4)); }
   | /* empty */			{ $$ = new list<Edge*>(); }
   ;
 

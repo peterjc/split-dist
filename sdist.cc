@@ -53,6 +53,15 @@ static struct poptOption main_options[] = {
 	0
     },
     {
+	"silent",
+	's',
+	POPT_ARG_NONE,
+	&options::silent,
+	0,
+	"Toggle silent (minimal) output.",
+	0
+    },
+    {
 	"print-tree",
 	'p',
 	POPT_ARG_NONE,
@@ -187,12 +196,42 @@ main(int argc, const char *argv[])
     SetBuilder sb(lm);
     SetMatcher sm(lm,sb);
 
-    t1->dfs_traverse(lm);
-    t1->dfs_traverse(sb);
-    t2->dfs_traverse(sm);
+    try
+	{
+	    t1->dfs_traverse(lm);
+	    t1->dfs_traverse(sb);
+	    t2->dfs_traverse(sm);
+	}
+    catch (LabelMap::AlreadyPushedEx ex)
+	{
+	    cerr << "The label '" << ex.label
+		 << "' appeard twice in the first tree.\n";
+	    return 2;
+	}
+    catch (LabelMap::UnkownLabelEx ex)
+	{
+	    cerr << "The label '" << ex.label
+		 << "' only appears in the second tree.\n";
+	    return 2;
+	}
 
-    cout << sm.match_count() << " out of " << sm.edge_count()
-	 << " edges were supported\n";
+    if (options::verbose)
+	{
+	    cout << "Distance: " << sm.edge_count() - sm.match_count()
+		 << ", i.e. " << sm.match_count()
+		 << " out of " << sm.edge_count()
+		 << " edges were supported\n";
+	}
+    else if (options::silent)
+	{
+	    cout << sm.edge_count() - sm.match_count() << endl;
+	}
+    else
+	{
+	    cout << sm.edge_count() - sm.match_count()
+		 << " (" << sm.match_count() << '/' << sm.edge_count() << ')'
+		 << endl;
+	}
 
     if (options::output_fname)
 	{
