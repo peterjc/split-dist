@@ -39,6 +39,7 @@ public:
     Tree *t2() const { return _t2; }
 
     void tag_supported() { _supported = true; }
+    bool supported() const { return _supported; }
 
     void dfs(class Visitor &, const Tree *from);
     void print(std::ostream &os, const class Tree *from = 0) const;

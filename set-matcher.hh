@@ -10,26 +10,17 @@
 
 class SetMatcher : public SetTraverser {
     SetBuilder   &_map;
-    unsigned int  _edge_count;
-    unsigned int  _match_count;
 
 public:
     SetMatcher(LabelMap &lm, SetBuilder &sb)
-	: SetTraverser(lm,false), _map(sb), _edge_count(0), _match_count(0)
+	: SetTraverser(lm,false), _map(sb)
     {}
     virtual ~SetMatcher() {}
 
     virtual void handle_edge(BitSet *bs, Edge *) {
-	_edge_count++;
 	Edge *split_edge = _map.lookup(bs);
-	if (split_edge) {
-	    split_edge->tag_supported();
-	    _match_count++;
-	}
+	if (split_edge) split_edge->tag_supported();
     }
-
-    unsigned int edge_count() const  { return _edge_count;  }
-    unsigned int match_count() const { return _match_count; }
 };
 
 #endif // SET_MATCHER_HH

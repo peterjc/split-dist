@@ -85,7 +85,7 @@ CXXFLAGS = -Wall -g -O2
 # -DNDEBUG
 
 # misc.
-EXTRA_DIST = parser.h
+EXTRA_DIST = parser.h check-sdist.pl
 
 MAINTAINERCLEANFILES = parser.cc  parser.h  lexer.cc
 
@@ -95,13 +95,13 @@ YFLAGS = -d -t -v
 bin_PROGRAMS = sdist
 
 sdist_LDADD = @LEXLIB@
-sdist_SOURCES = options.hh options.cc lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh bitset.hh bitset.cc label-map.hh label-map.cc label-map-visitor.hh set-traverser.hh set-traverser.cc set-builder.hh set-builder.cc set-matcher.hh sdist.cc
+sdist_SOURCES = options.hh options.cc lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh bitset.hh bitset.cc label-map.hh label-map.cc label-map-visitor.hh set-traverser.hh set-traverser.cc set-builder.hh set-builder.cc set-matcher.hh result-counter.hh sdist.cc
 
 # test programs
 noinst_PROGRAMS = parser-test visitor-test bitset-test label-map-test label-map-visitor-test set-builder-test set-matcher-test
 
 # FIXME: use script to test output
-TESTS = parser-test visitor-test bitset-test label-map-test label-map-visitor-test set-builder-test set-matcher-test
+TESTS = parser-test visitor-test bitset-test label-map-test label-map-visitor-test set-builder-test set-matcher-test check-sdist.pl
 
 parser_test_LDADD = @LEXLIB@
 parser_test_SOURCES = lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh parser-test.cc
@@ -216,9 +216,9 @@ DIST_SOURCES = $(bitset_test_SOURCES) $(label_map_test_SOURCES) \
 	$(sdist_SOURCES) $(set_builder_test_SOURCES) \
 	$(set_matcher_test_SOURCES) $(visitor_test_SOURCES)
 DIST_COMMON = README AUTHORS COPYING ChangeLog INSTALL Makefile.am \
-	Makefile.in NEWS aclocal.m4 config.hh.in configure configure.in \
-	depcomp install-sh lexer.cc missing mkinstalldirs parser.cc \
-	parser.h ylwrap
+	Makefile.in NEWS TODO aclocal.m4 config.hh.in configure \
+	configure.in depcomp install-sh lexer.cc missing mkinstalldirs \
+	parser.cc parser.h ylwrap
 SOURCES = $(bitset_test_SOURCES) $(label_map_test_SOURCES) $(label_map_visitor_test_SOURCES) $(parser_test_SOURCES) $(sdist_SOURCES) $(set_builder_test_SOURCES) $(set_matcher_test_SOURCES) $(visitor_test_SOURCES)
 
 all: config.hh

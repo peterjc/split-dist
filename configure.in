@@ -1,6 +1,6 @@
 
-AC_INIT(sdist, 0.1.1, mailund@birc.dk)
-AM_INIT_AUTOMAKE(sdist, 0.1.1)
+AC_INIT(sdist, 0.1.2, mailund@birc.dk)
+AM_INIT_AUTOMAKE(sdist, 0.1.2)
 AM_CONFIG_HEADER(config.hh)
 
 AC_PROG_CXX

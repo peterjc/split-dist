@@ -9,6 +9,7 @@ CXXFLAGS += -g -O2
 # misc.
 EXTRA_DIST =
 EXTRA_DIST += parser.h
+EXTRA_DIST += check-sdist.pl
 
 MAINTAINERCLEANFILES =
 MAINTAINERCLEANFILES += parser.cc 
@@ -34,6 +35,7 @@ sdist_SOURCES += label-map-visitor.hh
 sdist_SOURCES += set-traverser.hh set-traverser.cc
 sdist_SOURCES += set-builder.hh set-builder.cc
 sdist_SOURCES += set-matcher.hh
+sdist_SOURCES += result-counter.hh
 sdist_SOURCES += sdist.cc
 
 
@@ -57,6 +59,7 @@ TESTS += label-map-test
 TESTS += label-map-visitor-test
 TESTS += set-builder-test
 TESTS += set-matcher-test
+TESTS += check-sdist.pl
 
 parser_test_LDADD = @LEXLIB@
 parser_test_SOURCES =

@@ -1,3 +1,14 @@
+2003-10-07  Thomas Mailund  <mailund@birc.dk>
+
+	* configure.in: bumped to 0.1.2
+
+	* sdist.cc (main): bugfix: I wasn't necessarily traversing the
+	trees from the same root, thus the bit-set labelling could be wrong.
+
+	* result-counter.hh: added traversal for collecting the
+	match/non-match statistics.  Previously I was collecting info for
+	t2 vs t1, but printing t1 vs t2.
+
 2003-10-06  Thomas Mailund  <mailund@birc.dk>
 
 	* configure.in: bumped to 0.1.1

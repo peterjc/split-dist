@@ -17,6 +17,7 @@ using namespace std;
 #include "label-map-visitor.hh"
 #include "set-builder.hh"
 #include "set-matcher.hh"
+#include "result-counter.hh"
 
 #if HAVE_LIBPOPT
 static struct poptOption info_options[] = {
@@ -196,11 +197,19 @@ main(int argc, const char *argv[])
     SetBuilder sb(lm);
     SetMatcher sm(lm,sb);
 
+    ResultCounter rs;
+
     try
 	{
 	    t1->dfs_traverse(lm);
-	    t1->dfs_traverse(sb);
-	    t2->dfs_traverse(sm);
+
+	    Leaf *r1 = lm.root();
+	    Leaf *r2 = t2->find_leaf(r1->name());
+
+	    r1->dfs_traverse(sb);
+	    r2->dfs_traverse(sm);
+
+	    t1->dfs_traverse(rs);
 	}
     catch (LabelMap::AlreadyPushedEx ex)
 	{
@@ -217,19 +226,19 @@ main(int argc, const char *argv[])
 
     if (options::verbose)
 	{
-	    cout << "Distance: " << sm.edge_count() - sm.match_count()
-		 << ", i.e. " << sm.match_count()
-		 << " out of " << sm.edge_count()
+	    cout << "Distance: " << rs.edge_count - rs.sup_count
+		 << ", i.e. " << rs.sup_count
+		 << " out of " << rs.edge_count
 		 << " edges were supported\n";
 	}
     else if (options::silent)
 	{
-	    cout << sm.edge_count() - sm.match_count() << endl;
+	    cout << rs.edge_count - rs.sup_count << endl;
 	}
     else
 	{
-	    cout << sm.edge_count() - sm.match_count()
-		 << " (" << sm.match_count() << '/' << sm.edge_count() << ')'
+	    cout << rs.edge_count - rs.sup_count
+		 << " (" << rs.sup_count << '/' << rs.edge_count << ')'
 		 << endl;
 	}
 

@@ -34,7 +34,7 @@ FLOAT                           -?{D}+|-?[0-9]*\.[0-9]+|-?[0-9]*\.[0-9]+[eE][+-]
 ":"				return ':';
 {FLOAT}				yylval.f = atof(yytext); return FLOAT;
 
-[a-zA-Z][^:() \t\n]*		yylval.str = yytext; return NAME;
+[a-zA-Z][^:(),; \t\n]*		yylval.str = yytext; return NAME;
 '[^']*'				yytext[strlen(yytext)-1] = '\0'; yylval.str = yytext+1; return NAME;
 
 
