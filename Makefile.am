@@ -35,7 +35,7 @@ sdist_SOURCES += label-map.hh label-map.cc
 sdist_SOURCES += label-map-visitor.hh
 sdist_SOURCES += set-traverser.hh set-traverser.cc
 sdist_SOURCES += set-builder.hh set-builder.cc
-sdist_SOURCES += set-matcher.hh
+sdist_SOURCES += set-matcher.hh set-matcher.cc
 sdist_SOURCES += split-set-count.hh split-set-count.cc
 sdist_SOURCES += sdist.cc
 
@@ -126,5 +126,5 @@ set_matcher_test_SOURCES += set-builder.hh set-builder.cc
 set_matcher_test_SOURCES += split-set.hh split-set.cc 
 set_matcher_test_SOURCES += split-set-count.hh split-set-count.cc
 set_matcher_test_SOURCES += options.hh options.cc
-set_matcher_test_SOURCES += set-matcher.hh
+set_matcher_test_SOURCES += set-matcher.hh set-matcher.cc
 set_matcher_test_SOURCES += set-matcher-test.cc

@@ -1,3 +1,8 @@
+2004-05-04  Thomas Mailund  <mailund@birc.dk>
+
+	* sdist.cc: equal label-sets were not checked for, and this caused
+	a crash-bug.  it has now been fixed
+
 2004-04-16  Thomas Mailund  <mailund@birc.dk>
 
 	* : added #include <cassert> a number of places to avoid compile errors

@@ -440,10 +440,49 @@ main(int argc, const char *argv[])
 	}
     catch (LabelMap::AlreadyPushedEx ex)
 	{
-	    cerr << "The label '" << ex.label << "' appeard twice.\n";
+	    cerr << "The label '" << ex.label << "' appeard twice in "
+		 << tree_files[0] << '\n';
 	    exit(2);
 	}
-    
+
+    // validating equal label sets
+    for (unsigned int i = 1; i < trees.size(); ++i)
+	{
+	    LabelMapVisitor lm2;
+	    try
+		{
+		    trees[i]->dfs_traverse(lm2);
+		}
+	    catch (LabelMap::AlreadyPushedEx ex)
+		{
+		    cerr << "The label '" << ex.label << "' appeard twice in "
+			 << tree_files[i] << '\n';
+		    exit(2);
+		}
+
+	    if (lm.size() != lm2.size())
+		{
+		    cerr << "The label set of " << tree_files[0] << " and "
+			 << tree_files[i] << " differs\n";
+		    return 2;
+		}
+
+	    for (unsigned int n = 0; n < lm.size(); ++n)
+		{
+		    try
+			{
+			    lm2[lm.name(n)];
+			}
+		    catch (LabelMap::UnkownLabelEx ex)
+			{
+			    cerr << "The label '" << ex.label
+				 << "' was not in the " << tree_files[i]
+				 << " tree.\n";
+			    return 2;
+			}
+		}
+	}
+
 
     vector< vector<unsigned int> >
 	split_dist_matrix(trees.size(), vector<unsigned int>(trees.size()));
