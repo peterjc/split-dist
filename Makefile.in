@@ -95,13 +95,13 @@ YFLAGS = -d -t -v
 bin_PROGRAMS = sdist
 
 sdist_LDADD = @LEXLIB@
-sdist_SOURCES = options.hh options.cc lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh bitset.hh bitset.cc label-map.hh label-map.cc label-map-visitor.hh set-traverser.hh set-traverser.cc set-builder.hh set-builder.cc set-matcher.hh result-counter.hh sdist.cc
+sdist_SOURCES = options.hh options.cc lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh bitset.hh bitset.cc split-set.hh split-set.cc label-map.hh label-map.cc label-map-visitor.hh set-traverser.hh set-traverser.cc set-builder.hh set-builder.cc set-matcher.hh split-set-count.hh split-set-count.cc result-counter.hh sdist.cc
 
 # test programs
-noinst_PROGRAMS = parser-test visitor-test bitset-test label-map-test label-map-visitor-test set-builder-test set-matcher-test
+noinst_PROGRAMS = parser-test visitor-test bitset-test split-set-test label-map-test label-map-visitor-test set-builder-test set-matcher-test
 
 # FIXME: use script to test output
-TESTS = parser-test visitor-test bitset-test label-map-test label-map-visitor-test set-builder-test set-matcher-test check-sdist.pl
+TESTS = parser-test visitor-test bitset-test split-set-test label-map-test label-map-visitor-test set-builder-test set-matcher-test check-sdist.pl
 
 parser_test_LDADD = @LEXLIB@
 parser_test_SOURCES = lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh parser-test.cc
@@ -111,16 +111,18 @@ visitor_test_SOURCES = lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh v
 
 bitset_test_SOURCES = bitset.hh bitset.cc bitset-test.cc
 
+split_set_test_SOURCES = bitset.hh bitset.cc label-map.hh label-map.cc split-set.hh split-set.cc split-set-test.cc
+
 label_map_test_SOURCES = label-map.hh label-map.cc label-map-test.cc
 
 label_map_visitor_test_LDADD = @LEXLIB@
 label_map_visitor_test_SOURCES = lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh label-map.hh label-map.cc label-map-visitor.hh label-map-visitor-test.cc
 
 set_builder_test_LDADD = @LEXLIB@
-set_builder_test_SOURCES = lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh bitset.hh bitset.cc label-map.hh label-map.cc label-map-visitor.hh set-traverser.hh set-traverser.cc set-builder.hh set-builder.cc set-builder-test.cc
+set_builder_test_SOURCES = lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh bitset.hh bitset.cc label-map.hh label-map.cc label-map-visitor.hh set-traverser.hh set-traverser.cc split-set.hh split-set.cc  split-set-count.hh split-set-count.cc  set-builder.hh set-builder.cc set-builder-test.cc
 
 set_matcher_test_LDADD = @LEXLIB@
-set_matcher_test_SOURCES = lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh bitset.hh bitset.cc label-map.hh label-map.cc label-map-visitor.hh set-traverser.hh set-traverser.cc set-builder.hh set-builder.cc set-matcher.hh set-matcher-test.cc
+set_matcher_test_SOURCES = lexer.ll parser.yy parser.hh tree.hh tree.cc visitor.hh bitset.hh bitset.cc label-map.hh label-map.cc label-map-visitor.hh set-traverser.hh set-traverser.cc set-builder.hh set-builder.cc split-set.hh split-set.cc  split-set-count.hh split-set-count.cc  set-matcher.hh set-matcher-test.cc
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -128,9 +130,9 @@ CONFIG_HEADER = config.hh
 CONFIG_CLEAN_FILES =
 bin_PROGRAMS = sdist$(EXEEXT)
 noinst_PROGRAMS = parser-test$(EXEEXT) visitor-test$(EXEEXT) \
-	bitset-test$(EXEEXT) label-map-test$(EXEEXT) \
-	label-map-visitor-test$(EXEEXT) set-builder-test$(EXEEXT) \
-	set-matcher-test$(EXEEXT)
+	bitset-test$(EXEEXT) split-set-test$(EXEEXT) \
+	label-map-test$(EXEEXT) label-map-visitor-test$(EXEEXT) \
+	set-builder-test$(EXEEXT) set-matcher-test$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_bitset_test_OBJECTS = bitset.$(OBJEXT) bitset-test.$(OBJEXT)
@@ -155,14 +157,16 @@ parser_test_OBJECTS = $(am_parser_test_OBJECTS)
 parser_test_DEPENDENCIES =
 parser_test_LDFLAGS =
 am_sdist_OBJECTS = options.$(OBJEXT) lexer.$(OBJEXT) parser.$(OBJEXT) \
-	tree.$(OBJEXT) bitset.$(OBJEXT) label-map.$(OBJEXT) \
-	set-traverser.$(OBJEXT) set-builder.$(OBJEXT) sdist.$(OBJEXT)
+	tree.$(OBJEXT) bitset.$(OBJEXT) split-set.$(OBJEXT) \
+	label-map.$(OBJEXT) set-traverser.$(OBJEXT) \
+	set-builder.$(OBJEXT) split-set-count.$(OBJEXT) sdist.$(OBJEXT)
 sdist_OBJECTS = $(am_sdist_OBJECTS)
 sdist_DEPENDENCIES =
 sdist_LDFLAGS =
 am_set_builder_test_OBJECTS = lexer.$(OBJEXT) parser.$(OBJEXT) \
 	tree.$(OBJEXT) bitset.$(OBJEXT) label-map.$(OBJEXT) \
-	set-traverser.$(OBJEXT) set-builder.$(OBJEXT) \
+	set-traverser.$(OBJEXT) split-set.$(OBJEXT) \
+	split-set-count.$(OBJEXT) set-builder.$(OBJEXT) \
 	set-builder-test.$(OBJEXT)
 set_builder_test_OBJECTS = $(am_set_builder_test_OBJECTS)
 set_builder_test_DEPENDENCIES =
@@ -170,10 +174,17 @@ set_builder_test_LDFLAGS =
 am_set_matcher_test_OBJECTS = lexer.$(OBJEXT) parser.$(OBJEXT) \
 	tree.$(OBJEXT) bitset.$(OBJEXT) label-map.$(OBJEXT) \
 	set-traverser.$(OBJEXT) set-builder.$(OBJEXT) \
+	split-set.$(OBJEXT) split-set-count.$(OBJEXT) \
 	set-matcher-test.$(OBJEXT)
 set_matcher_test_OBJECTS = $(am_set_matcher_test_OBJECTS)
 set_matcher_test_DEPENDENCIES =
 set_matcher_test_LDFLAGS =
+am_split_set_test_OBJECTS = bitset.$(OBJEXT) label-map.$(OBJEXT) \
+	split-set.$(OBJEXT) split-set-test.$(OBJEXT)
+split_set_test_OBJECTS = $(am_split_set_test_OBJECTS)
+split_set_test_LDADD = $(LDADD)
+split_set_test_DEPENDENCIES =
+split_set_test_LDFLAGS =
 am_visitor_test_OBJECTS = lexer.$(OBJEXT) parser.$(OBJEXT) \
 	tree.$(OBJEXT) visitor-test.$(OBJEXT)
 visitor_test_OBJECTS = $(am_visitor_test_OBJECTS)
@@ -196,7 +207,10 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/set-builder-test.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/set-builder.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/set-matcher-test.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/set-traverser.Po ./$(DEPDIR)/tree.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/set-traverser.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/split-set-count.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/split-set-test.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/split-set.Po ./$(DEPDIR)/tree.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/visitor-test.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -214,12 +228,13 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(bitset_test_SOURCES) $(label_map_test_SOURCES) \
 	$(label_map_visitor_test_SOURCES) $(parser_test_SOURCES) \
 	$(sdist_SOURCES) $(set_builder_test_SOURCES) \
-	$(set_matcher_test_SOURCES) $(visitor_test_SOURCES)
+	$(set_matcher_test_SOURCES) $(split_set_test_SOURCES) \
+	$(visitor_test_SOURCES)
 DIST_COMMON = README AUTHORS COPYING ChangeLog INSTALL Makefile.am \
 	Makefile.in NEWS TODO aclocal.m4 config.hh.in configure \
 	configure.in depcomp install-sh lexer.cc missing mkinstalldirs \
 	parser.cc parser.h ylwrap
-SOURCES = $(bitset_test_SOURCES) $(label_map_test_SOURCES) $(label_map_visitor_test_SOURCES) $(parser_test_SOURCES) $(sdist_SOURCES) $(set_builder_test_SOURCES) $(set_matcher_test_SOURCES) $(visitor_test_SOURCES)
+SOURCES = $(bitset_test_SOURCES) $(label_map_test_SOURCES) $(label_map_visitor_test_SOURCES) $(parser_test_SOURCES) $(sdist_SOURCES) $(set_builder_test_SOURCES) $(set_matcher_test_SOURCES) $(split_set_test_SOURCES) $(visitor_test_SOURCES)
 
 all: config.hh
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -332,6 +347,9 @@ parser.h: parser.cc
 set-matcher-test$(EXEEXT): $(set_matcher_test_OBJECTS) $(set_matcher_test_DEPENDENCIES) 
 	@rm -f set-matcher-test$(EXEEXT)
 	$(CXXLINK) $(set_matcher_test_LDFLAGS) $(set_matcher_test_OBJECTS) $(set_matcher_test_LDADD) $(LIBS)
+split-set-test$(EXEEXT): $(split_set_test_OBJECTS) $(split_set_test_DEPENDENCIES) 
+	@rm -f split-set-test$(EXEEXT)
+	$(CXXLINK) $(split_set_test_LDFLAGS) $(split_set_test_OBJECTS) $(split_set_test_LDADD) $(LIBS)
 parser.h: parser.cc
 	@if test ! -f $@; then \
 	  rm -f parser.cc; \
@@ -361,6 +379,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set-builder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set-matcher-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set-traverser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/split-set-count.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/split-set-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/split-set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/visitor-test.Po@am__quote@
 

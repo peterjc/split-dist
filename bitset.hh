@@ -1,6 +1,6 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #ifndef BITSET_HH
 #define BITSET_HH
@@ -28,6 +28,8 @@ public:
 
     BitSet &operator=(const BitSet &b);
 
+    size_t size() const { return _size; }
+
     class Bit {
 	BitSet &_bs;
 	size_t  _idx;
@@ -40,9 +42,13 @@ public:
 	Bit& operator=(bool b);
 	Bit& operator=(const Bit &b);
     };
-    Bit  operator[](size_t idx)       { return Bit(*this,idx); }
-    bool operator[](size_t idx) const
+
+    Bit  at(size_t idx) { return Bit(*this,idx); }
+    bool at(size_t idx) const
     { return _data[word_index(idx)] & bit_index(idx); }
+
+    Bit  operator[](size_t idx)       { return at(idx); }
+    bool operator[](size_t idx) const { return at(idx); }
 
     bool operator==(const BitSet &b) const;
     bool operator!=(const BitSet &b) const { return !(*this == b); }

@@ -1,6 +1,6 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #include "options.hh"
 
@@ -9,8 +9,9 @@ namespace options {
     int contact;
 
     int verbose;
-    int silent;
 
-    int print_tree;
-    const char *output_fname = 0;
+    int print_all_splits;
+    int print_shared_splits;
+
+    int print_trees;
 };

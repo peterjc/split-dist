@@ -1,13 +1,13 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #include "label-map-visitor.hh"
 #include "tree.hh"
 #include "parser.hh"
 
 int
-main()
+main(int argc, const char *argv[])
 {
     Tree *t = parse_string("('A':0.0, ('B':10.1, 'C':0.1), 'D')");
     LabelMapVisitor lm;
@@ -21,6 +21,6 @@ main()
     assert(lm["B"] == 2);
     assert(lm["A"] == 3);
 
-    assert(dynamic_cast<Leaf*>(lm.root())->name() == "D");
-    assert(lm.root() == t->find_leaf("D"));
+    assert(lm.root_label() == "D");
+    assert(lm.root_label() == t->find_leaf("D")->name());
 }

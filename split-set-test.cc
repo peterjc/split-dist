@@ -2,8 +2,10 @@
 //                             University of Aarhus, Denmark
 //                             Contact: Thomas Mailund <mailund@birc.dk>
 
-#include "label-map.hh"
-
+#include "split-set.hh"
+#include <cassert>
+#include <sstream>
+using namespace std;
 
 int
 main(int argc, const char *argv[])
@@ -18,32 +20,12 @@ main(int argc, const char *argv[])
     assert(lm["bar"] == 1);
     assert(lm["baz"] == 2);
 
-    try
-	{
-	    lm.push("foo");
-	    assert(false);
-	}
-    catch (LabelMap::AlreadyPushedEx ex)
-	{
-	}
-    catch(...)
-	{
-	    assert(false);
-	}
+    BitSet bs(3);
+    SplitSet ss(lm,bs);
+    ss[0] = true; ss[2] = true;
 
-    try
-	{
-	    lm["qux"];
-	    assert(false);
-	}
-    catch (LabelMap::UnkownLabelEx ex)
-	{
-	}
-    catch(...)
-	{
-	    assert(false);
-	}
+    ostringstream os;
+    os << ss;
 
-
-    
+    assert(os.str() == string("foo baz | bar "));
 }

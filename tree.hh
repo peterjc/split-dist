@@ -1,6 +1,6 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #ifndef TREE_HH
 #define TREE_HH
@@ -20,6 +20,12 @@ public:
     class Leaf *find_leaf(std::string name);
 
     virtual void print(std::ostream &os, const class Edge *from = 0) const = 0;
+
+private:
+    friend int main(int,const char**);
+    static int no_trees;
+public:
+    static int number_of_trees() { return no_trees; }
 };
 
 class Edge {
@@ -30,6 +36,7 @@ class Edge {
     float _length;
 
     bool  _supported;
+    int   _supported_count;
 
 public:
     Edge(Tree *t2, float length);
@@ -38,8 +45,11 @@ public:
     Tree *t1() const { return _t1; }
     Tree *t2() const { return _t2; }
 
-    void tag_supported() { _supported = true; }
-    bool supported() const { return _supported; }
+    void tag_supported() { _supported = true; ++_supported_count; }
+    bool supported()       const { return _supported; }
+    int  supported_count() const { return _supported_count; }
+
+    void reset_supported() { _supported = false; }
 
     void dfs(class Visitor &, const Tree *from);
     void print(std::ostream &os, const class Tree *from = 0) const;

@@ -1,6 +1,6 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #include "parser.hh"
 #include "visitor.hh"
@@ -54,7 +54,7 @@ test_traversal(Tree *t, set<string> labels)
 
 
 int
-main()
+main(int argc, const char *argv[])
 {
     Tree *t = parse_string("('A':0.0, ('B':10.1, 'C':0.1), 'D')");
 

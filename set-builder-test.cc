@@ -1,25 +1,27 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #include "set-builder.hh"
 #include "parser.hh"
 #include "label-map-visitor.hh"
+#include "split-set-count.hh"
 
 #include <map>
 using namespace std;
 
 int
-main()
+main(int argc, const char *argv[])
 {
     Tree *t = parse_string("('A':0.0, ('B':10.1, 'C':0.1), 'D')");
 
     LabelMapVisitor lm;
     t->dfs_traverse(lm);
-    assert(lm.root()->name() == "D");
+    assert(lm.root_label() == "D");
 
     SetBuilder sb(lm);
-    lm.root()->dfs_traverse(sb);
+    Leaf *root = t->find_leaf(lm.root_label());
+    root->dfs_traverse(sb);
 
     // numbering: D=0, C=1, B=2, A=3
 
@@ -115,4 +117,10 @@ main()
     bs[2] = true;
     bs[3] = true;
     assert(sb.lookup(&bs) == 0);
+
+
+    split_set_count::ss_count_iterator_t i;
+    for (i = split_set_count::begin(); i != split_set_count::end(); ++i)
+	if (!i->first.is_trivial())
+	    cout << i->first << " : " << i->second << endl;
 }

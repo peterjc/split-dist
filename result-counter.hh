@@ -1,6 +1,6 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #ifndef RESULT_COUNTER_HH
 #define RESULT_COUNTER_HH
@@ -18,5 +18,11 @@ struct ResultCounter : public EdgeVisitor {
 	if (e.supported()) sup_count++;
     };
 };
+
+struct ClearSupported : EdgeVisitor {
+    ClearSupported() {}
+    virtual void pre_visit(Edge &e) {};
+    virtual void post_visit(Edge &e) { e.reset_supported(); };
+};    
 
 #endif // RESULT_COUNTER_HH

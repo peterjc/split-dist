@@ -1,6 +1,6 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #ifndef SET_TRAVERSER_HH
 #define SET_TRAVERSER_HH
@@ -13,8 +13,6 @@
 #include <stack>
 
 class SetTraverser : public Visitor {
-    LabelMap &_lm;
-
     // INVARIANT: when returning to an inner node, the non-null
     // elements at the top of the stack contains the bit-sets for the
     // immediate children of the node.
@@ -23,9 +21,12 @@ class SetTraverser : public Visitor {
 
     void delete_on_stack();
 
+protected:
+    LabelMap &_lm;
+
 public:
     SetTraverser(LabelMap &lm, bool delete_poped)
-	: _lm(lm), _delete_poped(delete_poped)
+	: _delete_poped(delete_poped), _lm(lm)
     {}
     virtual ~SetTraverser();
 

@@ -1,6 +1,6 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #ifndef LABEL_MAP_VISITOR_HH
 #define LABEL_MAP_VISITOR_HH
@@ -9,14 +9,14 @@
 #include "label-map.hh"
 
 class LabelMapVisitor : public LeafVisitor, public LabelMap {
-    Leaf *_root;
+    std::string _root_label;
 public:
-    LabelMapVisitor() : _root(0) {}
-    virtual ~LabelMapVisitor()   {}
+    LabelMapVisitor() {}
+    virtual ~LabelMapVisitor() {}
     void pre_visit(Leaf &l)  { /*dummy*/ }
-    void post_visit(Leaf &l) { if (push(l.name()) == 0) _root = &l; }
+    void post_visit(Leaf &l) {if (push(l.name()) == 0) _root_label = l.name();}
 
-    Leaf *root() const { return _root; }
+    std::string root_label() const { return _root_label; }
 };
 
 #endif // LABEL_MAP_VISITOR_HH

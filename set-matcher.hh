@@ -1,6 +1,6 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #ifndef SET_MATCHER_HH
 #define SET_MATCHER_HH
@@ -13,7 +13,7 @@ class SetMatcher : public SetTraverser {
 
 public:
     SetMatcher(LabelMap &lm, SetBuilder &sb)
-	: SetTraverser(lm,false), _map(sb)
+	: SetTraverser(lm,true), _map(sb)
     {}
     virtual ~SetMatcher() {}
 

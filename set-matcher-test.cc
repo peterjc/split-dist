@@ -1,6 +1,6 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #include "parser.hh"
 #include "label-map-visitor.hh"
@@ -11,37 +11,38 @@
 using namespace std;
 
 int
-main()
+main(int argc, const char *argv[])
 {
     Tree *t = parse_string("('A':0.0, ('B':10.1, 'C':0.1), 'D')");
 
     ostringstream os1;
     os1 << *t << endl;
-    assert(os1.str() == string("('D' 0.5:0, ('C' 0.5:0.1, 'B' 0.5:10.1) 0.5:0, 'A' 0.5:0)\n"));
+    assert(os1.str() == string("('D' 1 : 0, ('C' 1 : 0.1, 'B' 1 : 10.1) 1 : 0, 'A' 1 : 0)\n"));
 
     LabelMapVisitor lm;
     t->dfs_traverse(lm);
-    assert(dynamic_cast<Leaf*>(lm.root())->name() == "D");
+    assert(lm.root_label() == "D");
 
     SetBuilder sb(lm);
-    lm.root()->dfs_traverse(sb);
+    t->find_leaf(lm.root_label())->dfs_traverse(sb);
 
     SetMatcher sm(lm,sb);
-    lm.root()->dfs_traverse(sm);
+    t->find_leaf(lm.root_label())->dfs_traverse(sm);
 
     ostringstream os2;
     os2 << *t << endl;
-    assert(os2.str() == string("('D' 1:0, ('C' 1:0.1, 'B' 1:10.1) 1:0, 'A' 1:0)\n"));
+    assert(os2.str() == string("('D' 1 : 0, ('C' 1 : 0.1, 'B' 1 : 10.1) 1 : 0, 'A' 1 : 0)\n"));
 
     Tree *t1 = parse_string("('A':0.0, ('B':10.1, 'C':0.1), 'D')");
     Tree *t2 = parse_string("(('A':0.0, 'B':10.1):1, 'C':0.1, 'D')");
+    Tree::no_trees = 2;
 
     LabelMapVisitor lm2;
     t1->dfs_traverse(lm2);
     SetBuilder sb2(lm2);
     SetMatcher sm2(lm2,sb2);
 
-    Leaf *r1 = lm2.root();
+    Leaf *r1 = t1->find_leaf(lm2.root_label());
     Leaf *r2 = t2->find_leaf(r1->name());
 
     assert(r1 != 0);
@@ -52,5 +53,6 @@ main()
 
     ostringstream os3;
     os3 << *t1 << endl;
-    assert(os3.str() == string("('D' 1:0, ('C' 1:0.1, 'B' 1:10.1) 0.5:0, 'A' 1:0)\n"));
+
+    assert(os3.str() == string("('D' 1 : 0, ('C' 1 : 0.1, 'B' 1 : 10.1) 0.5 : 0, 'A' 1 : 0)\n"));
 }

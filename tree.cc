@@ -1,18 +1,21 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #include "tree.hh"
 #include "visitor.hh"
 #include <functional>
 using namespace std;
 
+int Tree::no_trees;
+
 // --- constructors and destructors -----------------------------------
 Tree::Tree()  {}
 Tree::~Tree() {}
 
 Edge::Edge(Tree *t2, float length)
-    : _t1(0), _t2(t2), _length(length)
+    : _t1(0), _t2(t2), _length(length),
+      _supported(false), _supported_count(1) // the edge itself always support
 {
     assert(t2 != 0);
     _t2->connect(this);
@@ -46,7 +49,13 @@ Edge::print(ostream &os, const class Tree *from) const
 {
     Tree *sub_tree = (from == _t1) ? _t2 : _t1;
     sub_tree->print(os,this);
-    os << ' ' << (_supported ? 1 : 0.5) << ':' << _length;
+    // make sure we do not divide by zero
+    if (Tree::number_of_trees() > 1)
+	os << ' '
+	   << static_cast<double>(_supported_count)/Tree::number_of_trees()
+	   << " : " << _length;
+    else
+	os << " 1 : " << _length; // if it is the only tree it is full support
 }
 
 void

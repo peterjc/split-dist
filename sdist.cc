@@ -1,6 +1,6 @@
-// Copyright (C) 2003 by BiRC -- Bioinformatics Research Center
-//                               University of Aarhus, Denmark
-//                               Contact: Thomas Mailund <mailund@birc.dk>
+// Copyright (C) 2003, 2004 by BiRC -- Bioinformatics Research Center
+//                             University of Aarhus, Denmark
+//                             Contact: Thomas Mailund <mailund@birc.dk>
 
 #include "config.hh"
 #include "options.hh"
@@ -10,6 +10,8 @@
 #endif
 
 #include <iostream>
+#include <iomanip>
+#include <vector>
 using namespace std;
 
 #include "tree.hh"
@@ -18,6 +20,8 @@ using namespace std;
 #include "set-builder.hh"
 #include "set-matcher.hh"
 #include "result-counter.hh"
+#include "split-set-count.hh"
+
 
 #if HAVE_LIBPOPT
 static struct poptOption info_options[] = {
@@ -54,30 +58,30 @@ static struct poptOption main_options[] = {
 	0
     },
     {
-	"silent",
-	's',
-	POPT_ARG_NONE,
-	&options::silent,
-	0,
-	"Toggle silent (minimal) output.",
-	0
-    },
-    {
-	"print-tree",
+	"print-trees",
 	'p',
 	POPT_ARG_NONE,
-	&options::print_tree,
+	&options::print_trees,
 	0,
-	"Print tree with supported edges annotated.",
+	"Print trees with supported edges annotated.",
 	0
     },
     {
-	"output-file",
-	'o',
-	POPT_ARG_STRING,
-	&options::output_fname,
+	"print-all-splits",
+	'\0',
+	POPT_ARG_NONE,
+	&options::print_all_splits,
 	0,
-	"Name of file to print output tree to.",
+	"Print all splits observed in the input trees (with their count).",
+	0
+    },
+    {
+	"print-shared-splits",
+	'p',
+	POPT_ARG_NONE,
+	&options::print_shared_splits,
+	0,
+	"Print splits shared by all trees.",
 	0
     },
     {
@@ -101,13 +105,14 @@ static struct poptOption main_options[] = {
 int
 main(int argc, const char *argv[])
 {
-    const char *t1_fname;
-    const char *t2_fname;
+    const char *fname;
+    vector<const char*> tree_files;
+    vector<Tree*> trees;
 
 #if HAVE_LIBPOPT
 
     poptContext ctxt = poptGetContext(0, argc, argv, main_options, 0);
-    poptSetOtherOptionHelp(ctxt, "tree1 tree2");
+    poptSetOtherOptionHelp(ctxt, "trees");
 
   int opt = poptGetNextOpt(ctxt);
   if (opt < -1)
@@ -128,135 +133,161 @@ main(int argc, const char *argv[])
 	  cout << PACKAGE_STRING << "\n\n";
 	  cout << "For questions or comments on sdist, contact:\n"
 	       << "\tThomas Mailund <thomas@mailund.dk>, <mailund@birc.dk>\n"
-	       << "\n"
-	       << "For submitting bug-reports, please use "
-	       << '<' << PACKAGE_BUGREPORT << ">\n\n";
-
+	       << "\n";
 	  return 0;
       }
 
-  t1_fname = poptGetArg(ctxt);
-  t2_fname = poptGetArg(ctxt);
-  if (t1_fname == 0 || t2_fname == 0)
+  while ( (fname = poptGetArg(ctxt)) )
       {
-	  cerr << "Wrong number of arguments\n"
-	       << "usage: qdist [options] tree1 tree2"
-	       << endl;
-	  return 2;
-      }
-
-  const char *extra = poptGetArg(ctxt);
-  if (extra)
-      {
-	  cerr << "WARNING: Ignored options after tree files." << endl;
-      }
 
 #else  // ! HAVE_LIBPOPT
-    if (argc != 3)
-	{
-	    cerr << "wrong number of arguments!\n"
-		 << "usage: " << argv[0] << " first-tree second-tree"
-		 << endl;
-	    exit(1);
-	}
 
-    t1_fname = argv[1];
-    t2_fname = argv[2];
+  for (i = 1; i < argc; ++i)
+      {
+	  fname = argv[i];
 #endif
 
-    FILE *t1_fp = fopen(t1_fname, "r");
-    if (!t1_fp)
-	{
-	    cerr << "could not open `" << t1_fname << "' : ";
-	    perror(0);
-	    exit(2);
-	}
-    FILE *t2_fp = fopen(t2_fname, "r");
-    if (!t2_fp)
-	{
-	    cerr << "could not open `" << t2_fname << "' : ";
-	    perror(0);
-	    exit(2);
-	}
+	  tree_files.push_back(fname);
+	  FILE *fp = fopen(fname, "r");
+	  if (!fp)
+	      {
+		  cerr << "could not open `" << fname << "' : ";
+		  perror(0);
+		  exit(2);
+	      }
+	  Tree *t = parse_file(fp); fclose(fp);
+	  trees.push_back(t);
+      }
 
-    Tree *t1 = parse_file(t1_fp); fclose(t1_fp);
-    if (!t1)
+    Tree::no_trees = trees.size();
+    if (trees.size() < 2)
 	{
-	    cerr << "error parsing file " << t1_fname << endl;
+	    cerr << "at least two trees expected!\n";
 	    exit(2);
 	}
-    Tree *t2 = parse_file(t2_fp); fclose(t2_fp);
-    if (!t2)
-	{
-	    cerr << "error parsing file " << t2_fname << endl;
-	    exit(2);
-	}
-
 
     LabelMapVisitor lm;
-    SetBuilder sb(lm);
-    SetMatcher sm(lm,sb);
-
-    ResultCounter rs;
-
+    Tree *first = trees[0];
     try
 	{
-	    t1->dfs_traverse(lm);
-
-	    Leaf *r1 = lm.root();
-	    Leaf *r2 = t2->find_leaf(r1->name());
-
-	    r1->dfs_traverse(sb);
-	    r2->dfs_traverse(sm);
-
-	    t1->dfs_traverse(rs);
+	    first->dfs_traverse(lm);
 	}
     catch (LabelMap::AlreadyPushedEx ex)
 	{
-	    cerr << "The label '" << ex.label
-		 << "' appeard twice in the first tree.\n";
-	    return 2;
+	    cerr << "The label '" << ex.label << "' appeard twice.\n";
+	    exit(2);
 	}
-    catch (LabelMap::UnkownLabelEx ex)
+    
+
+    cout << "Distance matrix:\n";
+    for (unsigned int i = 0; i < trees.size(); ++i)
 	{
-	    cerr << "The label '" << ex.label
-		 << "' only appears in the second tree.\n";
-	    return 2;
+	    Tree *main_tree = trees[i];
+	    SetBuilder sb(lm);
+	    Leaf *r1 = main_tree->find_leaf(lm.root_label());
+
+	    cout << setw(10) << string(tree_files[i]).substr(0,10) << " : ";
+
+	    try
+		{
+		    r1->dfs_traverse(sb);
+		}
+	    catch (LabelMap::UnkownLabelEx ex)
+		{
+		    cerr << "The label '" << ex.label
+			 << "' was not in the " << tree_files[i] << " tree.\n";
+		    return 2;
+		}
+
+	    for (unsigned int j = 0; j < trees.size(); ++j)
+		{
+		    if (i == j) { cout << " - " << ' '; continue; }
+
+		    Tree *t = trees[j];
+		    SetMatcher sm(lm,sb);
+		    ResultCounter rs;
+		    ClearSupported cs;
+
+		    try
+			{
+			    Leaf *r2 = t->find_leaf(lm.root_label());
+
+			    r2->dfs_traverse(sm);
+			    r1->dfs_traverse(rs);
+			    r1->dfs_traverse(cs);
+			}
+		    catch (LabelMap::UnkownLabelEx ex)
+			{
+			    cerr << "The label '" << ex.label
+				 << "' was not in the "
+				 << tree_files[j] << " tree.\n";
+			    return 2;
+			}
+
+		    cout << setw(3) << rs.edge_count - rs.sup_count << ' ';
+		}
+
+	    cout << endl;
+
 	}
+    cout << endl;
 
     if (options::verbose)
 	{
-	    cout << "Distance: " << rs.edge_count - rs.sup_count
-		 << ", i.e. " << rs.sup_count
-		 << " out of " << rs.edge_count
-		 << " edges were supported\n";
+	    int no_splits = 0, no_splits_shared = 0;
+	    split_set_count::ss_count_iterator_t i;
+	    for (i = split_set_count::begin();
+		 i != split_set_count::end(); ++i)
+		if (!i->first.is_trivial())
+		    {
+			++no_splits;
+			if (i->second == Tree::number_of_trees())
+			    ++no_splits_shared;
+		    }
+
+	    cout << no_splits_shared << " out of "
+		 << no_splits
+		 << " non-trivial splits shared by all trees.\n\n";
 	}
-    else if (options::silent)
+    
+
+    if (options::print_shared_splits)
 	{
-	    cout << rs.edge_count - rs.sup_count << endl;
-	}
-    else
-	{
-	    cout << rs.edge_count - rs.sup_count
-		 << " (" << rs.sup_count << '/' << rs.edge_count << ')'
-		 << endl;
+	    cout << "Shared splits:\n";
+
+	    split_set_count::ss_count_iterator_t i;
+	    for (i = split_set_count::begin();
+		 i != split_set_count::end(); ++i)
+		if (!i->first.is_trivial()
+		    and i->second == Tree::number_of_trees())
+		    cout << i->first << endl;
+
+	    cout << endl;
 	}
 
-    if (options::output_fname)
+    if (options::print_all_splits)
 	{
-	    FILE *f = freopen(options::output_fname, "w", stdout);
-	    if (f == NULL)
-		{
-		    std::cerr << "Couldn't open output file `"
-			      << options::output_fname << "'\n";
-		    return 2;
-		}
-	    cout << *t1 << endl;
+	    cout << "All splits:\n";
+
+	    split_set_count::ss_count_iterator_t i;
+	    for (i = split_set_count::begin();
+		 i != split_set_count::end(); ++i)
+		if (!i->first.is_trivial())
+		    cout << i->first << " : " << i->second << endl;
+
+	    cout << endl;
 	}
-    else if (options::print_tree)
+
+    if (options::print_trees)
 	{
-	    cout << *t1 << endl;
+	    for (unsigned int i = 0; i < trees.size(); ++i)
+		cout << tree_files[i] << " : " << *trees[i] << endl;
 	}
+
+
+    vector<Tree*>::const_iterator i;
+    for (i = trees.begin(); i != trees.end(); ++i)
+	delete *i;
 
     return 0;
 }
