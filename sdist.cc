@@ -65,6 +65,26 @@ static struct poptOption main_options[] = {
 	"Produce minimal output.",
 	0
     },
+
+    {
+	"print-norm",
+	'\0',
+	POPT_ARG_NONE,
+	&options::print_norm_dist,
+	0,
+	"Print normalized distance (distance/total-splits).",
+	0
+    },
+    {
+	"print-sim",
+	'\0',
+	POPT_ARG_NONE,
+	&options::print_similarity,
+	0,
+	"Print similarity (shared-splits/total-splits).",
+	0
+    },
+
     {
 	"print-split-statistics",
 	'\0',
@@ -118,7 +138,7 @@ static struct poptOption main_options[] = {
 #endif
 
 
-
+// FIXME: refactor these, they share a *lot* of code
 static void
 print_dist_matrix(size_t label_width,
 		  vector< vector<unsigned int> > &split_dist_matrix,
@@ -143,6 +163,57 @@ print_dist_matrix(size_t label_width,
 	}
     cout << endl;
 }
+
+static void
+print_norm_dist_matrix(size_t label_width,
+		       vector< vector<double> > &norm_dist_matrix,
+		       const vector<const char*> &tree_files)
+{
+    size_t no_trees = norm_dist_matrix.size();
+    cout << "Normalized Distance Matrix:\n"
+	 << "---------------------------\n";
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    cout << setw(label_width)
+		 << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			cout << "       -" << ' ';
+		    else
+			// FIXME: width shouldn't be fixed at 6
+			cout << setw(6) << norm_dist_matrix[i][j] << ' ';
+		}
+	    cout << endl;
+	}
+    cout << endl;
+}
+
+static void
+print_similarity(size_t label_width,
+		 vector< vector<double> > &sim_matrix,
+		 const vector<const char*> &tree_files)
+{
+    size_t no_trees = sim_matrix.size();
+    cout << "Similarity Matrix:\n"
+	 << "------------------\n";
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    cout << setw(label_width)
+		 << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			cout << "       -" << ' ';
+		    else
+			// FIXME: width shouldn't be fixed at 6
+			cout << setw(6) << sim_matrix[i][j] << ' ';
+		}
+	    cout << endl;
+	}
+    cout << endl;
+}
+
 
 static void
 print_split_statistics(size_t label_width,
@@ -377,6 +448,11 @@ main(int argc, const char *argv[])
     vector< vector<unsigned int> >
 	split_dist_matrix(trees.size(), vector<unsigned int>(trees.size()));
 
+    vector< vector<double> >
+	norm_dist_matrix(trees.size(), vector<double>(trees.size()));
+    vector< vector<double> >
+	sim_matrix(trees.size(), vector<double>(trees.size()));
+
     vector< vector<unsigned int> >
 	max_small_set(trees.size(), vector<unsigned int>(trees.size()));
     vector< vector<unsigned int> >
@@ -425,7 +501,14 @@ main(int argc, const char *argv[])
 			    return 2;
 			}
 
-		    split_dist_matrix[i][j] = sm.edge_count() - sm.sup_count();
+		    unsigned int dist = sm.edge_count() - sm.sup_count();
+
+		    split_dist_matrix[i][j] = dist;
+		    if (options::print_norm_dist)
+			norm_dist_matrix[i][j] = double(dist)/sm.edge_count();
+		    if (options::print_similarity)
+			sim_matrix[i][j] = double(sm.sup_count())/sm.edge_count();
+
 		    if (options::print_split_statistics)
 			{
 			    max_small_set[i][j] = sm.max_small_set();
@@ -460,6 +543,12 @@ main(int argc, const char *argv[])
 
     if (!options::silent)
 	print_dist_matrix(label_width,split_dist_matrix, tree_files);
+
+    if (options::print_norm_dist)
+	print_norm_dist_matrix(label_width,norm_dist_matrix, tree_files);
+
+    if (options::print_similarity)
+	print_similarity(label_width,sim_matrix, tree_files);
 
     if (options::print_split_statistics)
 	print_split_statistics(label_width,

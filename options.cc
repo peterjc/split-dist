@@ -11,6 +11,9 @@ namespace options {
     int silent;
     int verbose;
 
+    int print_norm_dist;
+    int print_similarity;
+
     int print_split_statistics;
 
     int print_all_splits;
