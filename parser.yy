@@ -16,17 +16,17 @@ int lex_get_line (void);
 void lex_reset_line_number (void); 
 
 #include "tree.hh"
-extern Tree *yy_tree; 		// forward decl.
+extern Node *yy_tree; 		// forward decl.
  
 %}
 
 %union {
-    Tree              *tree;
+    Node              *tree;
     Leaf              *leaf;
     std::list<Edge*>  *edge_list;
     
     char  *str;
-    float  f;
+    double  f;
 };
 
 %type<tree> tree
@@ -45,8 +45,8 @@ top: tree 			{ yy_tree = $1; }
 
 tree:
     '(' edge_list ')' 		{ $$ = new InnerNode($2); delete $2; }
-  | '(' edge_list ')' ':' FLOAT { $$ = new InnerNode($2); delete $2; }
-  | '(' edge_list ')' FLOAT ':' FLOAT { $$ = new InnerNode($2); delete $2; }
+ //| '(' edge_list ')' ':' FLOAT { $$ = new InnerNode($2); delete $2; }
+ //| '(' edge_list ')' FLOAT ':' FLOAT { $$ = new InnerNode($2); delete $2; }
   | leaf 			{ $$ = $1; }
   ;
 
@@ -80,7 +80,7 @@ YY_BUFFER_STATE yy_create_buffer(FILE *file, int size);
 void yy_switch_to_buffer(YY_BUFFER_STATE new_buffer);
 
 
-Tree *yy_tree; 
+Node *yy_tree; 
 
 Tree *
 parse_string(const char *str)
@@ -92,7 +92,7 @@ parse_string(const char *str)
     res = yyparse();
     yy_delete_buffer(buf);
 
-    return (res == 0) ? yy_tree : 0;
+    return (res == 0) ? new Tree(yy_tree) : 0;
 }
 
 /* Size of default input buffer. -- got this guy from lexer.cc */
@@ -109,6 +109,6 @@ parse_file(FILE *fp)
     res = yyparse();
     yy_delete_buffer(parser_buf);
 
-    return (res == 0) ? yy_tree : 0;
+    return (res == 0) ? new Tree(yy_tree) : 0;
 }
 

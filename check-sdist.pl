@@ -4,9 +4,6 @@ use strict;
 use warnings;
 use diagnostics;
 
-exit 0; # the new version doesn't report the result so clean so I
-          # need a new of these tests
-
 our $test = 0;
 for (<DATA>) {
   my $first;
@@ -27,12 +24,12 @@ for (<DATA>) {
   close FIRST;
   close SECOND;
 
-  my $sdist_res = `sdist -s first second`;
-
+  my $sdist_res = (split / /, `./sdist -s first second`)[0];
 
   if ($sdist_res != $dist) {
-    print "result differs from expecte in test $test\n";
-    system "sdist -o diff.$test.tre first second";
+    print "result differs from expecte in test $test\n\n";
+    print "$first$second\n\n";
+    system "./sdist first second";
     exit 2;
   }
 
@@ -41,6 +38,8 @@ for (<DATA>) {
 }
 
 __END__
+
+# 1
 (A, B, C) | (A, B, C)   | 0
 
 # 2..3
@@ -48,8 +47,8 @@ __END__
 (A, B, C) | ((A, B), C) | 0
 
 # 4..5
-(A, (B, C)) | (A, B, C) |  1
-((A, B), C) | (A, B, C) |  1
+(A, (B, C)) | (A, B, C) |  0
+((A, B), C) | (A, B, C) |  0
 
 (A,B,C,D) | (A,B,C,D) | 0
 
@@ -58,6 +57,7 @@ __END__
 (A,B,C,D) | (A,B,(C,D)) | 0
 (A,B,C,D) | (A,(B,C),D) | 0
 
+# 10
 (A,B,C,D) | ((A,B),(C,D)) | 0
 
 # 11..13
@@ -65,20 +65,20 @@ __END__
 (A,B,(C,D)) | (A,B,C,D) | 1
 (A,(B,C),D) | (A,B,C,D) | 1
 
-((A,B),(C,D)) | (A,B,C,D) | 2
+# 14
+((A,B),(C,D)) | (A,B,C,D) | 1
 
 # 15..16
 (A,B,C,D) | ((A, B, C), D) | 0
-((A, B, C), D) | (A,B,C,D) | 1
+((A, B, C), D) | (A,B,C,D) | 0
 
 # 17..18
-((A,(B,C)),(D,E)) | ((A,(B,C)),D,E) | 1
+((A,(B,C)),(D,E)) | ((A,(B,C)),D,E) | 0
 ((A,(B,C)),D,E) | ((A,(B,C)),(D,E)) | 0
 
 # 19..20
 (A,(B,C),(D,E)) | ((A,(B,C)),D,E) | 0
 ((A,(B,C)),D,E) | (A,(B,C),(D,E)) | 0
 
-
-# this guy won't work, cause there is a node with degree 2
-# ((A,(B,C)),(D,E)) | ((A,(B,C)),(D,E)) | 0
+# 21
+((A,(B,C)),(D,E)) | ((A,(B,C)),(D,E)) | 0

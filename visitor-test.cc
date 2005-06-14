@@ -29,9 +29,9 @@ void LabelTester::post_visit(Leaf &l)
 
 
 class LeafCollector : public LeafVisitor {
-    map<string,Tree*> &_m;
+    map<string,Node*> &_m;
 public:
-    LeafCollector(map<string,Tree*> &m) : _m(m) {};
+    LeafCollector(map<string,Node*> &m) : _m(m) {};
     virtual void pre_visit(Leaf &l) {/*dummy*/}
     virtual void post_visit(Leaf &l);
 };
@@ -45,8 +45,9 @@ void LeafCollector::post_visit(Leaf &l)
 
 
 
+template <class T>
 void
-test_traversal(Tree *t, set<string> labels)
+test_traversal(T *t, set<string> labels)
 {
     LabelTester lt(labels);
     t->dfs_traverse(lt);
@@ -67,7 +68,7 @@ main(int argc, const char *argv[])
 
     test_traversal(t,labels);
 
-    map<string,Tree*> leaf_map;
+    map<string,Node*> leaf_map;
     LeafCollector lc(leaf_map);
     t->dfs_traverse(lc);
 

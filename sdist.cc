@@ -409,40 +409,42 @@ print_all_splits()
 int
 main(int argc, const char *argv[])
 {
-    const char *fname;
-    vector<const char*> tree_files;
-    vector<Tree*> trees;
+    try {
+
+	const char *fname;
+	vector<const char*> tree_files;
+	vector<Tree*> trees;
 
 #if HAVE_LIBPOPT
 
-    poptContext ctxt = poptGetContext(0, argc, argv, main_options, 0);
-    poptSetOtherOptionHelp(ctxt, "trees");
+	poptContext ctxt = poptGetContext(0, argc, argv, main_options, 0);
+	poptSetOtherOptionHelp(ctxt, "trees");
 
-  int opt = poptGetNextOpt(ctxt);
-  if (opt < -1)
-      {
-	  std::cerr << poptBadOption(ctxt, POPT_BADOPTION_NOALIAS)
-		    << ':' << poptStrerror(opt) << std::endl;
-	  return 2;
-      }
+	int opt = poptGetNextOpt(ctxt);
+	if (opt < -1)
+	    {
+		std::cerr << poptBadOption(ctxt, POPT_BADOPTION_NOALIAS)
+			  << ':' << poptStrerror(opt) << std::endl;
+		return 2;
+	    }
+	
+	if (options::version)
+	    {
+		cout << PACKAGE_STRING << endl;
+		return 0;
+	    }
+	
+	if (options::contact)
+	    {
+		cout << PACKAGE_STRING << "\n\n";
+		cout << "For questions or comments on sdist, contact:\n"
+		     << "\tThomas Mailund <mailund@birc.dk>\n"
+		     << "\n";
+		return 0;
+	    }
 
-  if (options::version)
-      {
-	  cout << PACKAGE_STRING << endl;
-	  return 0;
-      }
-
-  if (options::contact)
-      {
-	  cout << PACKAGE_STRING << "\n\n";
-	  cout << "For questions or comments on sdist, contact:\n"
-	       << "\tThomas Mailund <mailund@birc.dk>\n"
-	       << "\n";
-	  return 0;
-      }
-
-  while ( (fname = poptGetArg(ctxt)) )
-      {
+	while ( (fname = poptGetArg(ctxt)) )
+	    {
 
 #else  // ! HAVE_LIBPOPT
 
@@ -451,210 +453,228 @@ main(int argc, const char *argv[])
 	  fname = argv[i];
 #endif
 
-	  tree_files.push_back(fname);
-	  FILE *fp = fopen(fname, "r");
-	  if (!fp)
-	      {
-		  cerr << "could not open `" << fname << "' : ";
-		  perror(0);
-		  exit(2);
-	      }
-	  Tree *t = parse_file(fp); fclose(fp);
-	  if (!t)
-	      {
-		  cerr << "in file `" << fname << "'\n";
-		  exit(2);
-	      }
-	  trees.push_back(t);
-      }
 
-    Tree::no_trees = trees.size();
-    if (trees.size() < 2)
-	{
-	    cerr << "at least two trees expected!\n";
-	    exit(2);
-	}
-
-    LabelMapVisitor lm;
-    Tree *first = trees[0];
-    try
-	{
-	    first->dfs_traverse(lm);
-	}
-    catch (LabelMap::AlreadyPushedEx ex)
-	{
-	    cerr << "The label '" << ex.label << "' appeard twice in "
-		 << tree_files[0] << '\n';
-	    exit(2);
-	}
-
-    // validating equal label sets
-    for (unsigned int i = 1; i < trees.size(); ++i)
-	{
-	    LabelMapVisitor lm2;
-	    try
-		{
-		    trees[i]->dfs_traverse(lm2);
-		}
-	    catch (LabelMap::AlreadyPushedEx ex)
-		{
-		    cerr << "The label '" << ex.label << "' appeard twice in "
-			 << tree_files[i] << '\n';
-		    exit(2);
-		}
-
-	    if (lm.size() != lm2.size())
-		{
-		    cerr << "The label set of " << tree_files[0] << " and "
-			 << tree_files[i] << " differs\n";
-		    return 2;
-		}
-
-	    for (unsigned int n = 0; n < lm.size(); ++n)
-		{
-		    try
-			{
-			    lm2[lm.name(n)];
-			}
-		    catch (LabelMap::UnkownLabelEx ex)
-			{
-			    cerr << "The label '" << ex.label
-				 << "' was not in the " << tree_files[i]
-				 << " tree.\n";
-			    return 2;
-			}
-		}
-	}
-
-
-    vector< vector<unsigned int> >
-	split_dist_matrix(trees.size(), vector<unsigned int>(trees.size()));
-
-    vector< vector<double> >
-	norm_dist_matrix(trees.size(), vector<double>(trees.size()));
-    vector< vector<double> >
-	sim_matrix(trees.size(), vector<double>(trees.size()));
-
-    vector< vector<unsigned int> >
-	max_small_set(trees.size(), vector<unsigned int>(trees.size()));
-    vector< vector<unsigned int> >
-	min_small_set(trees.size(), vector<unsigned int>(trees.size()));
-    vector< vector<double> >
-	avg_small_set(trees.size(), vector<double>(trees.size()));
-
-    for (unsigned int i = 0; i < trees.size(); ++i)
-	{
-	    Tree *main_tree = trees[i];
-	    SetBuilder sb(lm);
-	    Leaf *r1 = main_tree->find_leaf(lm.root_label());
-
-	    try
-		{
-		    r1->dfs_traverse(sb);
-		}
-	    catch (LabelMap::UnkownLabelEx ex)
-		{
-		    cerr << "The label '" << ex.label
-			 << "' was not in the " << tree_files[i] << " tree.\n";
-		    return 2;
-		}
-
-	    for (unsigned int j = 0; j < trees.size(); ++j)
-		{
-		    if (i == j)
-			{
-			    split_dist_matrix[i][j] = 0;
-			    continue;
-			}
-
-		    Tree *t = trees[j];
-		    SetMatcher sm(lm,sb);
-
-		    try
-			{
-			    Leaf *r2 = t->find_leaf(lm.root_label());
-			    r2->dfs_traverse(sm);
-			}
-		    catch (LabelMap::UnkownLabelEx ex)
-			{
-			    cerr << "The label '" << ex.label
-				 << "' was not in the "
-				 << tree_files[j] << " tree.\n";
-			    return 2;
-			}
-
-		    unsigned int dist = sm.edge_count() - sm.sup_count();
-
-		    split_dist_matrix[i][j] = dist;
-		    if (options::print_norm_dist)
-			norm_dist_matrix[i][j] = double(dist)/sm.edge_count();
-		    if (options::print_similarity)
-			sim_matrix[i][j] = double(sm.sup_count())/sm.edge_count();
-
-		    if (options::print_split_statistics)
-			{
-			    max_small_set[i][j] = sm.max_small_set();
-			    min_small_set[i][j] = sm.min_small_set();
-			    avg_small_set[i][j] = sm.avg_small_set();
-			}
-		}
-	}
-
-    if (options::verbose || options::silent)
-	{
-	    int no_splits = 0, no_splits_shared = 0;
-	    split_set_count::ss_count_iterator_t i;
-	    for (i = split_set_count::begin();
-		 i != split_set_count::end(); ++i)
-		if (!i->first.is_trivial())
+		tree_files.push_back(fname);
+		FILE *fp = fopen(fname, "r");
+		if (!fp)
 		    {
-			++no_splits;
-			if (i->second == Tree::number_of_trees())
-			    ++no_splits_shared;
+			cerr << "could not open `" << fname << "' : ";
+			perror(0);
+			exit(2);
 		    }
+		Tree *t = parse_file(fp); fclose(fp);
+		if (!t)
+		    {
+			cerr << "in file `" << fname << "'\n";
+			exit(2);
+		    }
+		trees.push_back(t);
+	    }
 
-	    cout << no_splits_shared << " out of "
-		 << no_splits
-		 << " non-trivial splits shared by all trees.\n\n";
-	}
+       Tree::no_trees = trees.size();
+       if (trees.size() < 2)
+	   {
+	       cerr << "at least two trees expected!\n";
+	       exit(2);
+	   }
+       
+       LabelMapVisitor lm;
+       Tree *first = trees[0];
+       try
+	   {
+	       first->dfs_traverse(lm);
+	   }
+       catch (LabelMap::AlreadyPushedEx ex)
+	   {
+	       cerr << "The label '" << ex.label << "' appeard twice in "
+		    << tree_files[0] << '\n';
+	       exit(2);
+	   }
+       
+       // validating equal label sets
+       for (unsigned int i = 1; i < trees.size(); ++i)
+	   {
+	       LabelMapVisitor lm2;
+	       try
+		   {
+		       trees[i]->dfs_traverse(lm2);
+		   }
+	       catch (LabelMap::AlreadyPushedEx ex)
+		   {
+		       cerr << "The label '" 
+			    << ex.label << "' appeard twice in "
+			    << tree_files[i] << '\n';
+		       exit(2);
+		   }
+	       
+	       if (lm.size() != lm2.size())
+		   {
+		       cerr << "The label set of " << tree_files[0] << " and "
+			    << tree_files[i] << " differs\n";
+		       return 2;
+		   }
+	       
+	       for (unsigned int n = 0; n < lm.size(); ++n)
+		   {
+		       try
+			   {
+			       lm2[lm.name(n)];
+			   }
+		       catch (LabelMap::UnkownLabelEx ex)
+			   {
+			       cerr << "The label '" << ex.label
+				    << "' was not in the " << tree_files[i]
+				    << " tree.\n";
+			       return 2;
+			   }
+		   }
+	   }
 
-    size_t label_width = 0;
-    vector<const char*>::const_iterator itr;
-    for (itr = tree_files.begin(); itr != tree_files.end(); ++itr)
-	label_width = max(label_width,strlen(*itr));
 
-    if (!options::silent)
-	print_dist_matrix(label_width,split_dist_matrix, tree_files);
+       vector< vector<unsigned int> >
+	   split_dist_matrix(trees.size(), vector<unsigned int>(trees.size()));
 
-    if (options::print_norm_dist)
-	print_norm_dist_matrix(label_width,norm_dist_matrix, tree_files);
-
-    if (options::print_rf_dist)
-	print_rf_matrix(label_width,split_dist_matrix, tree_files);
-
-    if (options::print_similarity)
-	print_similarity(label_width,sim_matrix, tree_files);
-
-    if (options::print_split_statistics)
-	print_split_statistics(label_width,
-			       max_small_set,min_small_set,avg_small_set,
-			       tree_files);
-
-    if (options::print_shared_splits) print_shared_splits();
-    if (options::print_all_splits)    print_all_splits();
-
-    if (options::print_trees)
-	{
-	    cout << "Annotated Trees:\n"
-		 << "----------------\n";
-	    for (unsigned int i = 0; i < trees.size(); ++i)
-		cout << tree_files[i] << " : " << *trees[i] << endl;
-	}
-
-
-    vector<Tree*>::const_iterator i;
-    for (i = trees.begin(); i != trees.end(); ++i)
-	delete *i;
+       vector< vector<double> >
+	   norm_dist_matrix(trees.size(), vector<double>(trees.size()));
+       vector< vector<double> >
+	   sim_matrix(trees.size(), vector<double>(trees.size()));
+       
+       vector< vector<unsigned int> >
+	   max_small_set(trees.size(), vector<unsigned int>(trees.size()));
+       vector< vector<unsigned int> >
+	   min_small_set(trees.size(), vector<unsigned int>(trees.size()));
+       vector< vector<double> >
+	   avg_small_set(trees.size(), vector<double>(trees.size()));
+       
+       for (unsigned int i = 0; i < trees.size(); ++i)
+	   {
+	       Tree *main_tree = trees[i];
+	       SetBuilder sb(lm);
+	       Leaf *r1 = main_tree->find_leaf(lm.root_label());
+	       
+	       try
+		   {
+		       r1->dfs_traverse(sb);
+		   }
+	       catch (LabelMap::UnkownLabelEx ex)
+		   {
+		       cerr << "The label '" << ex.label
+			    << "' was not in the " 
+			    << tree_files[i] << " tree.\n";
+		       return 2;
+		   }
+	       
+	       for (unsigned int j = 0; j < trees.size(); ++j)
+		   {
+		       if (i == j)
+			   {
+			       split_dist_matrix[i][j] = 0;
+			       continue;
+			   }
+		       
+		       Tree *t = trees[j];
+		       SetMatcher sm(lm,sb);
+		       
+		       try
+			   {
+			       Leaf *r2 = t->find_leaf(lm.root_label());
+			       r2->dfs_traverse(sm);
+			   }
+		       catch (LabelMap::UnkownLabelEx ex)
+			   {
+			       cerr << "The label '" << ex.label
+				    << "' was not in the "
+				    << tree_files[j] << " tree.\n";
+			       return 2;
+			   }
+		       
+		       unsigned int dist = sm.edge_count() - sm.sup_count();
+		       
+		       // NB: ji here since we calculate the number of
+		       // edges found in j not found in i, but we want to
+		       // report i the other way around.
+		       split_dist_matrix[j][i] = dist;
+		       if (options::print_norm_dist)
+			   norm_dist_matrix[i][j] = double(dist)/sm.edge_count();
+		       if (options::print_similarity)
+			   sim_matrix[i][j] = double(sm.sup_count())/sm.edge_count();
+		       
+		       if (options::print_split_statistics)
+			   {
+			       max_small_set[i][j] = sm.max_small_set();
+			       min_small_set[i][j] = sm.min_small_set();
+			       avg_small_set[i][j] = sm.avg_small_set();
+			   }
+		   }
+	   }
+       
+       int no_splits = 0, no_splits_shared = 0;
+       if (options::verbose || options::silent)
+	   {
+	       split_set_count::ss_count_iterator_t i;
+	       for (i = split_set_count::begin();
+		    i != split_set_count::end(); ++i)
+		   if (!i->first.is_trivial())
+		       {
+			   ++no_splits;
+			   if (i->second == Tree::number_of_trees())
+			       ++no_splits_shared;
+		       }
+	   }
+       
+       size_t label_width = 0;
+       vector<const char*>::const_iterator itr;
+       for (itr = tree_files.begin(); itr != tree_files.end(); ++itr)
+	   label_width = max(label_width,strlen(*itr));
+       
+       if (!options::silent)
+	   print_dist_matrix(label_width,split_dist_matrix, tree_files);
+       
+       if (options::print_norm_dist)
+	   print_norm_dist_matrix(label_width,norm_dist_matrix, tree_files);
+       
+       if (options::print_rf_dist)
+	   print_rf_matrix(label_width,split_dist_matrix, tree_files);
+       
+       if (options::print_similarity)
+	   print_similarity(label_width,sim_matrix, tree_files);
+       
+       if (options::print_split_statistics)
+	   print_split_statistics(label_width,
+				  max_small_set,min_small_set,avg_small_set,
+				  tree_files);
+       
+       if (options::print_shared_splits) print_shared_splits();
+       if (options::print_all_splits)    print_all_splits();
+       
+       if (options::print_trees)
+	   {
+	       cout << "Annotated Nodes:\n"
+		    << "----------------\n";
+	       for (unsigned int i = 0; i < trees.size(); ++i)
+		   cout << tree_files[i] << " : " << *trees[i] << endl;
+	   }
+       
+       
+       if (options::silent && trees.size() == 2)
+	   cout << split_dist_matrix[0][1]
+		<< " edges found in the first tree but not in the second.\n";
+       if (options::verbose || (options::silent && trees.size() > 2))
+	   cout << no_splits_shared << " out of "
+		<< no_splits
+		<< " non-trivial splits shared by all trees.\n";
+       
+       
+       vector<Tree*>::const_iterator i;
+       for (i = trees.begin(); i != trees.end(); ++i)
+	   delete *i;
+       
+    } catch (no_node_with_high_degree&) {
+	std::cerr << "At least one input tree contains no node with\n"
+		  << "degree above 2 -- calculating the split distance\n"
+		  << "is therefore meaningless.\n";
+	return 2;
+    }
 
     return 0;
 }

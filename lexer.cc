@@ -284,11 +284,11 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 
 #define YY_NUM_RULES 12
 #define YY_END_OF_BUFFER 13
-static yyconst short int yy_accept[27] =
+static yyconst short int yy_accept[30] =
     {   0,
         0,    0,   13,   11,   10,    9,   11,    1,    2,    3,
-       11,   11,    6,    5,    4,    7,    0,    8,    0,    6,
-        6,    7,    0,    0,    6,    0
+       11,   11,    6,    5,    4,    7,    7,    0,    8,    0,
+        6,    6,    0,    7,    7,    6,    0,    6,    0
     } ;
 
 static yyconst int yy_ec[256] =
@@ -329,38 +329,40 @@ static yyconst int yy_meta[16] =
         3,    2,    2,    1,    1
     } ;
 
-static yyconst short int yy_base[30] =
+static yyconst short int yy_base[33] =
     {   0,
-        0,    0,   37,   38,   38,   38,   32,   38,   38,   38,
-        6,   24,    8,   38,   38,    0,   30,   38,   22,   10,
-       11,    0,   20,   14,   13,   38,   26,   29,   20
+        0,    0,   41,   42,   42,   42,   36,   42,   42,   42,
+        6,   28,    8,   42,   42,    0,   17,   34,   42,   26,
+        0,   10,   25,    0,   24,   22,   16,   11,   42,   28,
+       31,   17
     } ;
 
-static yyconst short int yy_def[30] =
+static yyconst short int yy_def[33] =
     {   0,
-       26,    1,   26,   26,   26,   26,   27,   26,   26,   26,
-       26,   26,   26,   26,   26,   28,   27,   26,   26,   26,
-       26,   28,   29,   26,   26,    0,   26,   26,   26
+       29,    1,   29,   29,   29,   29,   30,   29,   29,   29,
+       29,   29,   29,   29,   29,   31,   31,   30,   29,   29,
+       13,   29,   32,   31,   31,   31,   29,   29,    0,   29,
+       29,   29
     } ;
 
-static yyconst short int yy_nxt[54] =
+static yyconst short int yy_nxt[58] =
     {   0,
         4,    5,    6,    7,    8,    9,    4,   10,   11,   12,
-       13,   14,   15,   16,   16,   19,   20,   19,   20,   19,
-       20,   21,   24,   25,   25,   23,   17,   17,   17,   22,
-       25,   22,   21,   18,   21,   18,   26,    3,   26,   26,
-       26,   26,   26,   26,   26,   26,   26,   26,   26,   26,
-       26,   26,   26
+       13,   14,   15,   16,   17,   20,   21,   20,   21,   27,
+       22,   28,   23,   25,   23,   25,   28,   26,   18,   18,
+       18,   24,   26,   24,   26,   28,   22,   19,   22,   19,
+       29,    3,   29,   29,   29,   29,   29,   29,   29,   29,
+       29,   29,   29,   29,   29,   29,   29
     } ;
 
-static yyconst short int yy_chk[54] =
+static yyconst short int yy_chk[58] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,   11,   11,   13,   13,   20,
-       20,   21,   29,   25,   24,   21,   27,   27,   27,   28,
-       23,   28,   19,   17,   12,    7,    3,   26,   26,   26,
-       26,   26,   26,   26,   26,   26,   26,   26,   26,   26,
-       26,   26,   26
+        1,    1,    1,    1,    1,   11,   11,   13,   13,   32,
+       22,   28,   13,   17,   22,   17,   27,   17,   30,   30,
+       30,   31,   26,   31,   25,   23,   20,   18,   12,    7,
+        3,   29,   29,   29,   29,   29,   29,   29,   29,   29,
+       29,   29,   29,   29,   29,   29,   29
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -395,7 +397,7 @@ using namespace std;
 static int current_line = 1;
 
 
-#line 399 "lexer.cc"
+#line 401 "lexer.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -549,7 +551,7 @@ YY_DECL
 #line 27 "lexer.ll"
 
 
-#line 553 "lexer.cc"
+#line 555 "lexer.cc"
 
 	if ( yy_init )
 		{
@@ -600,13 +602,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 27 )
+				if ( yy_current_state >= 30 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 38 );
+		while ( yy_base[yy_current_state] != 42 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -697,7 +699,7 @@ YY_RULE_SETUP
 #line 53 "lexer.ll"
 ECHO;
 	YY_BREAK
-#line 701 "lexer.cc"
+#line 703 "lexer.cc"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -989,7 +991,7 @@ static yy_state_type yy_get_previous_state()
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 27 )
+			if ( yy_current_state >= 30 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1024,11 +1026,11 @@ yy_state_type yy_current_state;
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 27 )
+		if ( yy_current_state >= 30 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-	yy_is_jam = (yy_current_state == 26);
+	yy_is_jam = (yy_current_state == 29);
 
 	return yy_is_jam ? 0 : yy_current_state;
 	}
@@ -1079,6 +1081,7 @@ register char *yy_bp;
 #endif	/* ifndef YY_NO_UNPUT */
 
 
+#ifndef YY_NO_INPUT
 #ifdef __cplusplus
 static int yyinput()
 #else
@@ -1150,7 +1153,7 @@ static int input()
 
 	return c;
 	}
-
+#endif /* YY_NO_INPUT */
 
 #ifdef YY_USE_PROTOS
 void yyrestart( FILE *input_file )

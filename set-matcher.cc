@@ -8,13 +8,14 @@ void
 SetMatcher::handle_edge(BitSet *bs, Edge *)
 {
     Edge *split_edge = _map.lookup(bs);
-    
+
     ++_edge_count;
     if (split_edge)
 	{
 	    split_edge->tag_supported();
 	    ++_sup_count;
 	}
+
     
     // keep track of statistics for non-matching splits
     if (options::print_split_statistics and !split_edge)

@@ -30,15 +30,31 @@ main(int argc, const char *argv[])
     assert(check_parse_string("();"));
     assert(check_parse_string("'A'"));
 
-    assert(! check_parse_string(""));
 
+    assert(! check_parse_string(""));
     assert(check_parse_string("('A')"));
-    assert(check_parse_string("('A' 'B')"));
-    assert(check_parse_string("('A', 'B')"));
+
+    try {
+	check_parse_string("('A' 'B')");
+	assert(false);
+    } catch(no_node_with_high_degree&) {};
+    try {
+	check_parse_string("('A', 'B')");
+	assert(false);
+    } catch(no_node_with_high_degree&) {};
 
     assert(check_parse_string("('A':0.0)"));
-    assert(check_parse_string("('A':0.0 'B':10.1)"));
-    assert(check_parse_string("('A':.98, 'B')"));
+
+    try {
+	assert(check_parse_string("('A':0.0 'B':10.1)"));
+	assert(false);
+    } catch(no_node_with_high_degree&) {};
+    try {
+	assert(check_parse_string("('A':.98, 'B')"));
+	assert(false);
+    } catch(no_node_with_high_degree&) {};
+
+
 
     Tree *t = parse_string("('A':0.0, ('B':10.1, 'C':0.1), 'D')");
 
