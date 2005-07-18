@@ -16,6 +16,11 @@ namespace options {
     extern int print_rf_dist;
     extern int print_similarity;
 
+    extern int print_weighted_dist;
+    extern int print_weighted_sim;
+    extern int print_norm_weighted_dist;
+    extern int print_norm_weighted_sim;
+
     extern int print_split_statistics;
 
     extern int print_all_splits;

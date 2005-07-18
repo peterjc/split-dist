@@ -95,6 +95,43 @@ static struct poptOption main_options[] = {
     },
 
     {
+	"print-weighted-distance",
+	'w',
+	POPT_ARG_NONE,
+	&options::print_weighted_dist,
+	0,
+	"Print distance where edges are weighted by their length.",
+	0
+    },
+    {
+	"print-weighted-similarity",
+	'\0',
+	POPT_ARG_NONE,
+	&options::print_weighted_sim,
+	0,
+	"Print similarity where edges are weighted by their length.",
+	0
+    },
+    {
+	"print-norm-weighted-distance",
+	'\0',
+	POPT_ARG_NONE,
+	&options::print_norm_weighted_dist,
+	0,
+	"Print normalized distance where edges are weighted by their length.",
+	0
+    },
+    {
+	"print-norm-weighted-similarity",
+	'\0',
+	POPT_ARG_NONE,
+	&options::print_norm_weighted_sim,
+	0,
+	"Print normalized similarity where edges are weighted by their length.",
+	0
+    },
+
+    {
 	"print-split-statistics",
 	'\0',
 	POPT_ARG_NONE,
@@ -251,6 +288,108 @@ print_similarity(size_t label_width,
 	}
     cout << endl;
 }
+
+static void
+print_weighted_dist_matrix(size_t label_width,
+			   vector< vector<double> > &weighted_dist_matrix,
+			   const vector<const char*> &tree_files)
+{
+    size_t no_trees = weighted_dist_matrix.size();
+    cout << "Weighted Distance Matrix:\n"
+	 << "-------------------------\n";
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    cout << setw(label_width)
+		 << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			cout << "       -" << ' ';
+		    else
+			// FIXME: width shouldn't be fixed at 6
+			cout << setw(6) << weighted_dist_matrix[i][j] << ' ';
+		}
+	    cout << endl;
+	}
+    cout << endl;
+}
+
+static void
+print_weighted_similarity(size_t label_width,
+			  vector< vector<double> > &sim_matrix,
+			  const vector<const char*> &tree_files)
+{
+    size_t no_trees = sim_matrix.size();
+    cout << "Weighted Similarity Matrix:\n"
+	 << "---------------------------\n";
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    cout << setw(label_width)
+		 << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			cout << "       -" << ' ';
+		    else
+			// FIXME: width shouldn't be fixed at 6
+			cout << setw(6) << sim_matrix[i][j] << ' ';
+		}
+	    cout << endl;
+	}
+    cout << endl;
+}
+
+static void
+print_norm_weighted_dist_matrix(size_t label_width,
+			   vector< vector<double> > &weighted_dist_matrix,
+			   const vector<const char*> &tree_files)
+{
+    size_t no_trees = weighted_dist_matrix.size();
+    cout << "Normalized weighted Distance Matrix:\n"
+	 << "------------------------------------\n";
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    cout << setw(label_width)
+		 << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			cout << "       -" << ' ';
+		    else
+			// FIXME: width shouldn't be fixed at 6
+			cout << setw(6) << weighted_dist_matrix[i][j] << ' ';
+		}
+	    cout << endl;
+	}
+    cout << endl;
+}
+
+static void
+print_norm_weighted_similarity(size_t label_width,
+			       vector< vector<double> > &sim_matrix,
+			       const vector<const char*> &tree_files)
+{
+    size_t no_trees = sim_matrix.size();
+    cout << "Normalized weighted Similarity Matrix:\n"
+	 << "--------------------------------------\n";
+    for (unsigned int i = 0; i < no_trees; ++i)
+	{
+	    cout << setw(label_width)
+		 << string(tree_files[i]).substr(0,label_width) << " : ";
+	    for (unsigned int j = 0; j < no_trees; ++j)
+		{
+		    if (i == j)
+			cout << "       -" << ' ';
+		    else
+			// FIXME: width shouldn't be fixed at 6
+			cout << setw(6) << sim_matrix[i][j] << ' ';
+		}
+	    cout << endl;
+	}
+    cout << endl;
+}
+
+
 
 
 static void
@@ -538,6 +677,16 @@ main(int argc, const char *argv[])
 	   norm_dist_matrix(trees.size(), vector<double>(trees.size()));
        vector< vector<double> >
 	   sim_matrix(trees.size(), vector<double>(trees.size()));
+
+       vector< vector<double> >
+	   weighted_dist_matrix(trees.size(), vector<double>(trees.size()));
+       vector< vector<double> >
+	   weighted_sim_matrix(trees.size(), vector<double>(trees.size()));
+       vector< vector<double> >
+	   norm_weighted_dist_matrix(trees.size(), vector<double>(trees.size()));
+       vector< vector<double> >
+	   norm_weighted_sim_matrix(trees.size(), vector<double>(trees.size()));
+
        
        vector< vector<unsigned int> >
 	   max_small_set(trees.size(), vector<unsigned int>(trees.size()));
@@ -589,21 +738,35 @@ main(int argc, const char *argv[])
 			   }
 		       
 		       unsigned int dist = sm.edge_count() - sm.sup_count();
+		       double wdist = sm.edge_weight() - sm.sup_weight();;
 		       
 		       // NB: ji here since we calculate the number of
 		       // edges found in j not found in i, but we want to
 		       // report i the other way around.
 		       split_dist_matrix[j][i] = dist;
+
+		       if (options::print_weighted_dist)
+			   weighted_dist_matrix[j][i] = wdist;
+		       if (options::print_weighted_sim)
+			   weighted_sim_matrix[j][i] = sm.sup_weight();
+
+		       if (options::print_norm_weighted_dist)
+			   norm_weighted_dist_matrix[j][i] = 
+			       wdist/sm.edge_weight();
+		       if (options::print_norm_weighted_sim)
+			   norm_weighted_sim_matrix[j][i] = 
+			       sm.sup_weight()/sm.edge_weight();
+
 		       if (options::print_norm_dist)
-			   norm_dist_matrix[i][j] = double(dist)/sm.edge_count();
+			   norm_dist_matrix[j][i] = double(dist)/sm.edge_count();
 		       if (options::print_similarity)
-			   sim_matrix[i][j] = double(sm.sup_count())/sm.edge_count();
+			   sim_matrix[j][i] = double(sm.sup_count())/sm.edge_count();
 		       
 		       if (options::print_split_statistics)
 			   {
-			       max_small_set[i][j] = sm.max_small_set();
-			       min_small_set[i][j] = sm.min_small_set();
-			       avg_small_set[i][j] = sm.avg_small_set();
+			       max_small_set[j][i] = sm.max_small_set();
+			       min_small_set[j][i] = sm.min_small_set();
+			       avg_small_set[j][i] = sm.avg_small_set();
 			   }
 		   }
 	   }
@@ -639,6 +802,26 @@ main(int argc, const char *argv[])
        if (options::print_similarity)
 	   print_similarity(label_width,sim_matrix, tree_files);
        
+
+       if (options::print_weighted_dist)
+	   print_weighted_dist_matrix(label_width, 
+				      weighted_dist_matrix,
+				      tree_files);
+       if (options::print_weighted_sim)
+	   print_weighted_similarity(label_width, 
+				     weighted_sim_matrix,
+				     tree_files);
+
+       if (options::print_norm_weighted_dist)
+	   print_norm_weighted_dist_matrix(label_width, 
+					   norm_weighted_dist_matrix,
+					   tree_files);
+       if (options::print_norm_weighted_sim)
+	   print_norm_weighted_similarity(label_width, 
+					  norm_weighted_sim_matrix,
+					  tree_files);
+       
+
        if (options::print_split_statistics)
 	   print_split_statistics(label_width,
 				  max_small_set,min_small_set,avg_small_set,

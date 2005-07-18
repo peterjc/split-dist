@@ -15,6 +15,11 @@ namespace options {
     int print_rf_dist;
     int print_similarity;
 
+    int print_weighted_dist;
+    int print_weighted_sim;
+    int print_norm_weighted_dist;
+    int print_norm_weighted_sim;
+
     int print_split_statistics;
 
     int print_all_splits;

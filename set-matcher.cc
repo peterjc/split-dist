@@ -5,15 +5,17 @@
 #include "set-matcher.hh"
 
 void
-SetMatcher::handle_edge(BitSet *bs, Edge *)
+SetMatcher::handle_edge(BitSet *bs, Edge *e)
 {
     Edge *split_edge = _map.lookup(bs);
 
     ++_edge_count;
+    _edge_weight += e->length();
     if (split_edge)
 	{
 	    split_edge->tag_supported();
 	    ++_sup_count;
+	    _sup_weight += e->length();
 	}
 
     
