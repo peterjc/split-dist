@@ -17,7 +17,7 @@ class BitSet {
 
     static size_t word_index(size_t i) { return i/WORD_BITS; }
     static size_t bit_index (size_t i)
-    { return 1 << (WORD_BITS-1-(i%WORD_BITS)); }
+    { return size_t(1) << (WORD_BITS-1-(i%WORD_BITS)); }
 
     size_t array_length() const { return _size/WORD_BITS + 1; }
 

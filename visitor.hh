@@ -18,6 +18,8 @@ public:
     virtual void post_visit(Edge &e) = 0;
 
     virtual void complete() {}	// called when the traversal is all done
+protected:
+    virtual ~Visitor();
 };
 
 class NodeVisitor : public Visitor {

@@ -587,7 +587,7 @@ main(int argc, const char *argv[])
 
 #else  // ! HAVE_LIBPOPT
 
-  for (i = 1; i < argc; ++i)
+  for (int i = 1; i < argc; ++i)
       {
 	  fname = argv[i];
 #endif

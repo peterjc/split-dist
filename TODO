@@ -1,4 +1,0 @@
-
-BUGS:
- - Handle trees containing nodes with deg. 2.  For such trees we
-   cannot destinguish between the two edges connected to such a node.
